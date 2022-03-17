@@ -35,6 +35,9 @@ Clone the repository into the following directory depending on your platform:
 2. `yarn build` or `npm run build`
 3. Open Local and enable add-on
 
+## Post Install
+
+Some of the tools require access to private GitHub repos. When you first start the addon, you will be presented with an interface to enter a GitHub token. Once a valid token has been entered in that interface, the features requiring a token will be enabled for as long as the token remains valid. To bring the interface back, you can revoke the token from your [GitHub account token management page](https://github.com/settings/tokens). When [creating a new token](https://github.com/settings/tokens/new) for this app, ensure that the `repo` scope is selected. Feel free to set the expiration for whatever you'd like. Tokens are easy to create and the app will automatically prompt for a new one on expiry.
 ## License
 
 GPL
