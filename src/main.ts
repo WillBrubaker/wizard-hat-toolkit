@@ -12,18 +12,7 @@ export default function (context) {
 	const { Octokit } = require("@octokit/rest");
 	
 	ipcMain.on('test-request', async () => {
-		LocalMain.getServiceContainer().cradle.localLogger.log('info', 'am here');
-		const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-		octokit.rest.repos.getLatestRelease({
-			owner: "woocommerce",
-			repo: "automatewoo"
-		}).then(async ({ data }) => {
-			download(data.assets[0].browser_download_url, context.environment.userDataPath + '/addons/wizard-hat-toolkit/woocommerce-subscriptions.zip')
-		}, function(err){
-			LocalMain.getServiceContainer().cradle.localLogger.log('error', "big ol failure");
-			LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
-			LocalMain.UserData.remove('ghToken');
-		});
+		download("", "");
 	});
 	
 	ipcMain.on("set-user-token", (event, token) => {
@@ -47,11 +36,13 @@ export default function (context) {
 		} catch(err) {
 			if (err instanceof ValidationError) {
 				LocalMain.sendIPCEvent('debug-message', err);
-				LocalMain.getServiceContainer().cradle.localLogger.log('info', 'error:(');
-				LocalMain.getServiceContainer().cradle.localLogger.log('info', err.message);
-				LocalMain.sendIPCEvent("gh-token", {"valid": false, "ghToken": process.env.GITHUB_TOKEN});
+				LocalMain.getServiceContainer().cradle.localLogger.log('error', 'error:(');
+				LocalMain.getServiceContainer().cradle.localLogger.log('error', err.message);
+				LocalMain.sendIPCEvent("gh-token", {"valid": false});
 				LocalMain.UserData.remove('ghToken');			
 			} else {
+				LocalMain.sendIPCEvent('error');
+				LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
 				throw err;
 			}
 		}
@@ -69,7 +60,7 @@ export default function (context) {
 				options[option],
 			]).then(function () { }, function (err) {
 				LocalMain.sendIPCEvent('error');
-				LocalMain.getServiceContainer().cradle.localLogger.log('info', err);
+				LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
 				error = true;
 			});
 		}
@@ -88,9 +79,6 @@ export default function (context) {
 	 async function download(url, filePath) {
 		const user = 'woocommerce';
 		const repo = 'automatewoo';
-		const { GITHUB_TOKEN } = process.env;
-		LocalMain.getServiceContainer().cradle.localLogger.log('info', "gh token");
-		LocalMain.getServiceContainer().cradle.localLogger.log('info', `${GITHUB_TOKEN}`);
 		const outputdir = context.environment.userDataPath + '/addons/wizard-hat-toolkit/';
 		const leaveZipped = true;
 		const disableLogging = false;
@@ -100,22 +88,17 @@ export default function (context) {
 		// Filter out prereleases.
 		return release.prerelease === false;
 		}
+
 	
-		// Define a function to filter assets.
-		function filterAsset(asset) {
-		// Select assets that contain the string 'windows'.
-		return asset.name.includes('woo');
-		}
-	
-		downloadRelease(user, repo, outputdir, filterRelease, filterAsset, leaveZipped, disableLogging)
+		downloadRelease(user, repo, outputdir, filterRelease, () => {return true;}, leaveZipped, disableLogging)
 		.then(function() {
 			LocalMain.getServiceContainer().cradle.localLogger.log('info', "All done");
-			console.log('All done!');
 		})
 		.catch(function(err) {
-			LocalMain.getServiceContainer().cradle.localLogger.log('info', "big ol failure");
-			LocalMain.getServiceContainer().cradle.localLogger.log('info', err);
-			LocalMain.getServiceContainer().cradle.localLogger.log('info', err.message);
+			LocalMain.sendIPCEvent('error');
+			LocalMain.getServiceContainer().cradle.localLogger.log('error', "big ol failure");
+			LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+			LocalMain.getServiceContainer().cradle.localLogger.log('error', err.message);
 		});
 	}
 }
