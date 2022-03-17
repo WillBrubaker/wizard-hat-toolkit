@@ -315,8 +315,8 @@ export default class Boilerplate extends Component {
 		);
 	}
 
-	render() {
-		const Excercises = () => (
+	Excercises() {
+		return (
 			<ul style={{ listStyle: "none" }} class="wizard-hat">
 				<li>
 					<Button onClick={this.testRequest} className="woo button">
@@ -325,7 +325,9 @@ export default class Boilerplate extends Component {
 				</li>
 			</ul>
 		);
+	}
 
+	render() {
 		if (
 			"running" ===
 				this.props.siteStatuses[this.props.match.params.siteID] &&
@@ -338,17 +340,20 @@ export default class Boilerplate extends Component {
 					<div id="wootertiarynav">
 						<TertiaryNav>
 							<TertiaryNavItem
-								path="/item1"
-								component={this.storeConfig()}
+								path="/storeConfig"
+								component={this.storeConfig}
 							>
 								Store Config Options
 							</TertiaryNavItem>
-							<TertiaryNavItem path="/item2" component={Tools}>
+							<TertiaryNavItem
+								path="/Tools"
+								component={this.Tools}
+							>
 								Tools
 							</TertiaryNavItem>
 							<TertiaryNavItem
-								path="/item3"
-								component={Excercises}
+								path="/Excercises"
+								component={this.Excercises}
 							>
 								Excercises
 							</TertiaryNavItem>
