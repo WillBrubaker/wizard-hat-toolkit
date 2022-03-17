@@ -1,6 +1,6 @@
 ## Changelog
 
-### TBD TBD
+### 1.1-beta-2 TBD
 
 ### 1.1-beta 16 March 2022
 * Add functionality to validate GH tokens against the `repo` scope.
