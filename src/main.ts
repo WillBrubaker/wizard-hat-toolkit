@@ -22,7 +22,7 @@ export default function (context) {
 		}, function(err){
 			LocalMain.getServiceContainer().cradle.localLogger.log('info', "big ol failure");
 			LocalMain.getServiceContainer().cradle.localLogger.log('info', err);
-			LocalMain.UserData.set('ghToken', "someToken" );
+			LocalMain.UserData.remove('ghToken');
 
 		});
 	});
