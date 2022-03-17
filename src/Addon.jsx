@@ -264,11 +264,11 @@ export default class Boilerplate extends Component {
 						{this.renderSpinner()}
 					</Button>
 				</li>
-				<li>
-					<Button onClick={this.testRequest} className="woo button">
-						Test Octokit
-					</Button>
-				</li>
+			</ul>
+		);
+
+		const Tools = () => (
+			<ul style={{ listStyle: "none" }} class="wizard-hat">					
 				<li>
 					<Button onClick={this.launchPostman} className="woo button">
 						Launch Postman
@@ -276,27 +276,36 @@ export default class Boilerplate extends Component {
 				</li>
 			</ul>
 		);
-		const Item2 = () => <div>Item 2 Content</div>;
+
+		const Excercises = () => (
+			<ul style={{ listStyle: "none" }} class="wizard-hat">					
+				<li>
+				<Button onClick={this.testRequest} className="woo button">
+						Test d/l install plugin
+					</Button>
+				</li>
+			</ul>
+		);
+
 		const Item3 = () => <div>Item 3 Content</div>;
 		if ( 'running' === this.props.siteStatuses[this.props.match.params.siteID] && this.state.tokenIsValid ) {
 			return (
 				<div style={{ flex: "1", overflowY: "auto", margin: "10px" }}>
 					{this.renderInstructions()}
 					{this.renderError()}
-					<div>
+					<div id="wootertiarynav">
 						<TertiaryNav>
 							<TertiaryNavItem
-								exact
 								path="/item1"
 								component={storeConfig}
 							>
 								Store Config Options
 							</TertiaryNavItem>
-							<TertiaryNavItem path="/item2" component={Item2}>
-								Menu Item 2
+							<TertiaryNavItem path="/item2" component={Tools}>
+								Tools
 							</TertiaryNavItem>
-							<TertiaryNavItem path="/item3" component={Item3}>
-								Menu Item 3
+							<TertiaryNavItem path="/item3" component={Excercises}>
+								Excercises
 							</TertiaryNavItem>
 						</TertiaryNav>
 					</div>

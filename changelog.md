@@ -1,6 +1,8 @@
 ## Changelog
 
 ### TBD TBD
+
+### 1.1-beta 16 March 2022
 * Add functionality to validate GH tokens against the `repo` scope.
 * Provide an interface to enter a GH token
 * Conditionally render content based on site running and valid GH token

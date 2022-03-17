@@ -21,3 +21,7 @@ div.gh-token svg {
     position: absolute;
     right: 28%;
 }
+
+div#wootertiarynav ul {
+    width: auto;
+}
