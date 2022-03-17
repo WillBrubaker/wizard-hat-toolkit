@@ -1,0 +1,23 @@
+.woo.button {
+    background-color: #96588a;
+    color: #3c3c3c;
+    border-color: #3c3c3c;
+    float: left;
+    margin: 1em;
+}
+
+ul.wizard-hat li { 
+    width: 100%;
+    float: left;
+}
+
+div.gh-token input {
+    width: 75%;
+    height: 50px;
+}
+div.gh-token svg {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    right: 28%;
+}
