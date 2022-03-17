@@ -20,10 +20,9 @@ export default function (context) {
 		}).then(async ({ data }) => {
 			download(data.assets[0].browser_download_url, context.environment.userDataPath + '/addons/wizard-hat-toolkit/woocommerce-subscriptions.zip')
 		}, function(err){
-			LocalMain.getServiceContainer().cradle.localLogger.log('info', "big ol failure");
-			LocalMain.getServiceContainer().cradle.localLogger.log('info', err);
+			LocalMain.getServiceContainer().cradle.localLogger.log('error', "big ol failure");
+			LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
 			LocalMain.UserData.remove('ghToken');
-
 		});
 	});
 	
