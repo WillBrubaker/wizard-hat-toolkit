@@ -17,6 +17,7 @@ import {
 	TertiaryNavItem,
 	Card,
 	InputPasswordToggle,
+	Divider,
 } from "@getflywheel/local-components";
 
 export default class Boilerplate extends Component {
@@ -40,7 +41,6 @@ export default class Boilerplate extends Component {
 	}
 
 	componentDidMount() {
-		
 		ipcRenderer.on("instructions", (event) => {
 			this.setState({
 				showInstructions: true,
@@ -57,8 +57,8 @@ export default class Boilerplate extends Component {
 			this.setState({
 				showSpinner: false,
 			});
-		})
-		
+		});
+
 		ipcRenderer.on("gh-token", (event, args) => {
 			this.setState({
 				tokenIsValid: args.valid,
@@ -66,11 +66,11 @@ export default class Boilerplate extends Component {
 			this.setState({
 				ghToken: args.ghToken,
 			});
-			if ( ! args.valid ) {
+			if (!args.valid) {
 				LocalRenderer.send("error");
 			}
 		});
-		
+
 		ipcRenderer.on("debug-message", (event, args) => {
 			console.info(args);
 		});
@@ -176,6 +176,42 @@ export default class Boilerplate extends Component {
 		ipcRenderer.send("set-user-token", token);
 	}
 
+	weekContent(week) {
+		if (2 === week) {
+			const content = () =>
+				(
+					<div>
+						<Card
+							header={<Title>Day 1</Title>}
+							content={
+								<div>
+									<p>
+										Today you will be installing WooCommerce
+										and demo content and becoming familiar
+										with the settings.
+									</p>
+								</div>
+							}
+							footer={
+								<div>
+									<ul style={{ listStyle: "none" }} class="wizard-hat">
+								<li>
+									<Button className="woo button">Install WooCommerce</Button>
+									</li>
+									<li>
+									<Button className="woo button">Install Demo Content</Button>
+									</li>
+									</ul>
+								</div>
+							}
+						/>
+					</div>
+				);
+			return content;
+		}
+		return null;
+	}
+
 	render() {
 		const storeConfig = () => (
 			<ul style={{ listStyle: "none" }} class="wizard-hat">
@@ -268,7 +304,7 @@ export default class Boilerplate extends Component {
 		);
 
 		const Tools = () => (
-			<ul style={{ listStyle: "none" }} class="wizard-hat">					
+			<ul style={{ listStyle: "none" }} class="wizard-hat">
 				<li>
 					<Button onClick={this.launchPostman} className="woo button">
 						Launch Postman
@@ -278,17 +314,20 @@ export default class Boilerplate extends Component {
 		);
 
 		const Excercises = () => (
-			<ul style={{ listStyle: "none" }} class="wizard-hat">					
+			<ul style={{ listStyle: "none" }} class="wizard-hat">
 				<li>
-				<Button onClick={this.testRequest} className="woo button">
+					<Button onClick={this.testRequest} className="woo button">
 						Test d/l install plugin
 					</Button>
 				</li>
 			</ul>
 		);
 
-		const Item3 = () => <div>Item 3 Content</div>;
-		if ( 'running' === this.props.siteStatuses[this.props.match.params.siteID] && this.state.tokenIsValid ) {
+		if (
+			"running" ===
+				this.props.siteStatuses[this.props.match.params.siteID] &&
+			this.state.tokenIsValid
+		) {
 			return (
 				<div style={{ flex: "1", overflowY: "auto", margin: "10px" }}>
 					{this.renderInstructions()}
@@ -304,36 +343,63 @@ export default class Boilerplate extends Component {
 							<TertiaryNavItem path="/item2" component={Tools}>
 								Tools
 							</TertiaryNavItem>
-							<TertiaryNavItem path="/item3" component={Excercises}>
+							<TertiaryNavItem
+								path="/item3"
+								component={Excercises}
+							>
 								Excercises
+							</TertiaryNavItem>
+							<Divider />
+							<Title style={{ margin: "1em" }}>
+								Onbarding Content
+							</Title>
+							<TertiaryNavItem
+								path="/week2"
+								component={this.weekContent(2)}
+							>
+								Week 2
 							</TertiaryNavItem>
 						</TertiaryNav>
 					</div>
 				</div>
 			);
-		
-		} else if ( 'running' === this.props.siteStatuses[this.props.match.params.siteID] ) {
+		} else if (
+			"running" ===
+			this.props.siteStatuses[this.props.match.params.siteID]
+		) {
 			return (
-				<div style={{ flexGrow: "1", overflow: "auto", position: "relative" }} class="woo gh-token">
+				<div
+					style={{
+						flexGrow: "1",
+						overflow: "auto",
+						position: "relative",
+					}}
+					class="woo gh-token"
+				>
 					<Card>
 						<p>
-						The token is invalid. You will need a valid <a href="https://github.com/settings/tokens">Github token</a> with 'repo' scope enabled.
+							The token is invalid. You will need a valid{" "}
+							<a href="https://github.com/settings/tokens">
+								Github token
+							</a>{" "}
+							with 'repo' scope enabled.
 						</p>
-						<p>
-						Please enter a valid token to continue.
-						</p>
-						<InputPasswordToggle onChange={event => this.maybeSaveToken(event.target.value)} onBlur={event => this.maybeSaveToken(event.target.value)} />
+						<p>Please enter a valid token to continue.</p>
+						<InputPasswordToggle
+							onChange={(event) =>
+								this.maybeSaveToken(event.target.value)
+							}
+							onBlur={(event) =>
+								this.maybeSaveToken(event.target.value)
+							}
+						/>
 					</Card>
-					
 				</div>
-			)
-
+			);
 		} else {
 			return (
 				<div style={{ flex: "1", overflowY: "auto", margin: "10px" }}>
-					<Card>
-						No interface while site not running.
-					</Card>
+					<Card>No interface while site not running.</Card>
 				</div>
 			);
 		}
