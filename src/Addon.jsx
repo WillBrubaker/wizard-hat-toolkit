@@ -171,41 +171,35 @@ export default class Boilerplate extends Component {
 
 	weekContent(week) {
 		if (2 === week) {
-			const content = () => (
-				<div>
-					<Card
-						header={<Title>Day 1</Title>}
-						content={
-							<div>
-								<p>
-									Today you will be installing WooCommerce and
-									demo content and becoming familiar with the
-									settings.
-								</p>
-							</div>
-						}
-						footer={
-							<div>
-								<ul
-									style={{ listStyle: "none" }}
-									class="wizard-hat"
-								>
-									<li>
-										<Button className="woo button">
-											Install WooCommerce
-										</Button>
+			const content = () =>
+				(
+					<div>
+						<Card
+							header={<Title>Day 1</Title>}
+							content={
+								<div>
+									<p>
+										Today you will be installing WooCommerce
+										and demo content and becoming familiar
+										with the settings.
+									</p>
+								</div>
+							}
+							footer={
+								<div>
+									<ul style={{ listStyle: "none" }} class="wizard-hat">
+								<li>
+									<Button className="woo button">Install WooCommerce</Button>
 									</li>
 									<li>
-										<Button className="woo button">
-											Install Demo Content
-										</Button>
+									<Button className="woo button">Install Demo Content</Button>
 									</li>
-								</ul>
-							</div>
-						}
-					/>
-				</div>
-			);
+									</ul>
+								</div>
+							}
+						/>
+					</div>
+				);
 			return content;
 		}
 		return null;
@@ -301,10 +295,11 @@ export default class Boilerplate extends Component {
 				</li>
 			</ul>
 		);
-	}
+	} 
 
-	Tools() {
-		return (
+	render() {
+
+		const Tools = () => (
 			<ul style={{ listStyle: "none" }} class="wizard-hat">
 				<li>
 					<Button onClick={this.launchPostman} className="woo button">
@@ -313,9 +308,7 @@ export default class Boilerplate extends Component {
 				</li>
 			</ul>
 		);
-	}
 
-	render() {
 		const Excercises = () => (
 			<ul style={{ listStyle: "none" }} class="wizard-hat">
 				<li>
