@@ -89,7 +89,7 @@ export default function (context) {
 		return release.prerelease === false;
 		}
 
-		
+	
 		downloadRelease(user, repo, outputdir, filterRelease, () => {return true;}, leaveZipped, disableLogging)
 		.then(function() {
 			LocalMain.getServiceContainer().cradle.localLogger.log('info', "All done");

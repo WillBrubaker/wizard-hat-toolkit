@@ -205,8 +205,8 @@ export default class Boilerplate extends Component {
 		return null;
 	}
 
-	storeConfig() {
-		return (
+	render() {
+		const storeConfig = () => (
 			<ul style={{ listStyle: "none" }} class="wizard-hat">
 				<li>
 					<Button
@@ -295,9 +295,6 @@ export default class Boilerplate extends Component {
 				</li>
 			</ul>
 		);
-	} 
-
-	render() {
 
 		const Tools = () => (
 			<ul style={{ listStyle: "none" }} class="wizard-hat">
@@ -332,7 +329,7 @@ export default class Boilerplate extends Component {
 						<TertiaryNav>
 							<TertiaryNavItem
 								path="/item1"
-								component={this.storeConfig()}
+								component={storeConfig}
 							>
 								Store Config Options
 							</TertiaryNavItem>
