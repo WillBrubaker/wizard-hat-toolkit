@@ -44,7 +44,7 @@ export default function (context) {
 				}
 			);
 			LocalMain.UserData.set('ghToken', process.env.GITHUB_TOKEN);
-			LocalMain.sendIPCEvent("gh-token", {"valid": true, "ghToken": process.env.GITHUB_TOKEN});
+			LocalMain.sendIPCEvent("gh-token", {"valid": true});
 		} catch(err) {
 			if (err instanceof ValidationError) {
 				LocalMain.sendIPCEvent('debug-message', err);

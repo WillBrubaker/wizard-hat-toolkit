@@ -30,7 +30,6 @@ export default class Boilerplate extends Component {
 			localeSwitchedTo: "",
 			showSpinner: false,
 			tokenIsValid: false,
-			ghToken: "",
 		};
 
 		this.hideInstructions = this.hideInstructions.bind(this);
@@ -63,12 +62,6 @@ export default class Boilerplate extends Component {
 			this.setState({
 				tokenIsValid: args.valid,
 			});
-			this.setState({
-				ghToken: args.ghToken,
-			});
-			if (!args.valid) {
-				LocalRenderer.send("error");
-			}
 		});
 
 		ipcRenderer.on("debug-message", (event, args) => {
@@ -380,7 +373,7 @@ export default class Boilerplate extends Component {
 						<p>
 							The token is invalid. You will need a valid{" "}
 							<a href="https://github.com/settings/tokens">
-								Github token
+								GitHub token
 							</a>{" "}
 							with 'repo' scope enabled.
 						</p>
