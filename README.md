@@ -1,6 +1,6 @@
-# WooCommerce Locale Switcher
+# WooCommerce Wizard Hat Toolkit
 
-This [Local addon](https://localwp.com) provides a one-button press method to switch the shop address while also setting currency codes and measurement units to match. 
+This [Local addon](https://localwp.com) provides a home base for learning how to troubleshoot and support WooCommerce. 
 
 ## Installation
 
@@ -14,6 +14,7 @@ Download the .tgz file from the most recent release tag and "Install from disk" 
 ### Requirements
 
 * [Local](https://localwp.com/) 5.x ⚡️
+* [NPM](https://www.npmjs.com/)
 
 #### Clone
 
