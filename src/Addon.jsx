@@ -12,12 +12,13 @@ import {
 	Title,
 	Text,
 	Spinner,
-	Container,
 	TertiaryNav,
 	TertiaryNavItem,
 	Card,
 	InputPasswordToggle,
 	Divider,
+	AdvancedToggle,
+	List,
 } from "@getflywheel/local-components";
 
 export default class Boilerplate extends Component {
@@ -161,10 +162,6 @@ export default class Boilerplate extends Component {
 		}
 	}
 
-	renderItemOne() {
-		return <div>Item 1 Content</div>;
-	}
-
 	maybeSaveToken(token) {
 		ipcRenderer.send("set-user-token", token);
 	}
@@ -174,34 +171,131 @@ export default class Boilerplate extends Component {
 			const content = () => (
 				<div>
 					<Card
-						header={<Title>Day 1</Title>}
+						title={<Title style={{margin:"1em"}}>Day 1</Title>}
 						content={
 							<div>
 								<p>
-									Today you will be installing WooCommerce and
-									demo content and becoming familiar with the
-									settings.
+										Today you will be installing WooCommerce
+										and demo content and becoming familiar
+										with the settings.
+									</p>
+									<AdvancedToggle headingText={"Quick Start"} style={{height: "auto"}}>
+									<ul
+										style={{ listStyle: "none" }}
+										class="wizard-hat"
+									>
+										<li>
+											<Button className="woo button">
+												Install WooCommerce
+											</Button>
+										</li>
+										<li>
+											<Button className="woo button">
+												Install Demo Content
+											</Button>
+										</li>
+									</ul>
+									</AdvancedToggle>
+					
+										<p>
+										<List id="wc-settings" bullets={true} headerHasDivider={true} headerText={<a
+												href={`http://${
+													this.props.sites[
+														this.props.match.params
+															.siteID
+													].domain
+												}/wp-admin/admin.php?page=wc-settings`}
+											>
+												Visit WooCommerce Settings Page
+											</a>} listItemFontWeight="300">
+											<li>
+													The store address section is
+													where the base location for
+													the store is entered. This
+													address is used by tax rates
+													and some shipping caclulators.
+												</li>
+												<li>
+													Selling location(s): This
+													setting will limit the
+													countries available in the
+													"Country" selector of the
+													billing address at checkout.
+												</li>
+												<li>
+													Shipping location(s): This
+													setting will limit the
+													countries available in the
+													"Country" selector of the
+													shipping address at
+													checkout. This may be useful
+													in a scenario where a
+													merchant wishes to sell
+													virtual products globally
+													but only wishes to ship
+													within their own country.
+												</li>
+												<li>Default customer location: For customers on the site who are not logged in or do not have any address information on file, what location should the be considered to be from? This can have an affect how prices/taxes are displayed in the shop</li>
+												<li>Enable taxes: check to enable the tax settings tab. You should go ahead and enable this if it's not already.</li>
+												<li>Enable coupons: enables coupons...</li>
+												<li>Currency options: Which currency does the store work with. There are also some number formatting/localization settings available. This can also have an impact on payment method and/or shipping method availability, i.e. Canada Post requires the currency to be set to Canadian Dollars.</li>
+												<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#general-settings">General Settings Documentation</a>
+										</List>
+										<List id="product-settings" bullets={true} headerHasDivider={true} headerText={<a
+												href={`http://${
+													this.props.sites[
+														this.props.match.params
+															.siteID
+													].domain
+												}/wp-admin/admin.php?page=wc-settings&tab=products`}
+											>
+												Visit WooCommerce Product Settings Page
+											</a>} listItemFontWeight="300">
+											<li>
+													Shop Page: Allows you to assign the WordPress page that will output an archive of the WooCommerce products.
+												</li>
+												<li>
+													Add to cart behavior: Choose whether or not to redirect to the cart page after successful cart addition. Choose whether or not to use AJAX add to cart buttons on product archives. Bear in mind that add to cart buttons on product archives are only displayed on simple products.
+												</li>
+												<li>
+												Placeholder image: Allows you to set a default product image. It can use either a URL to an image or an attachnent ID.
+												</li>
+												<li>Measurements: Sets the unit of measure appropriate to the store's region.</li>
+												<li>Reviews: Self-explanatory reviews configuration options.</li>
+												<li>Product Ratings: Self-explanatory product rating configuration settings.</li>
+												<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#product-settings">Products Settingss Documentation</a>
+										</List>
 								</p>
 							</div>
 						}
-						footer={
+						footer={"hello footer"}
+					/>
+					
+						<Card
+							content={
 							<div>
+									<AdvancedToggle headingText={"Day 2"}>
+									<p>Today you will be doing Day 2 things</p>
 								<ul
 									style={{ listStyle: "none" }}
 									class="wizard-hat"
 								>
 									<li>
 										<Button className="woo button">
-											Install WooCommerce
+											Day2 Action1
 										</Button>
 									</li>
 									<li>
 										<Button className="woo button">
-											Install Demo Content
+											Day2 Action2
 										</Button>
 									</li>
 								</ul>
+								</AdvancedToggle>
 							</div>
+							}
+							footer={
+								
 						}
 					/>
 				</div>
@@ -328,7 +422,7 @@ export default class Boilerplate extends Component {
 		>
 			<Card>
 				<p>
-					The token is invalid. You will need a valid{" "}
+					This content requires a valid{" "}
 					<a href="https://github.com/settings/tokens">
 						GitHub token
 					</a>{" "}
@@ -368,11 +462,7 @@ export default class Boilerplate extends Component {
 							</TertiaryNavItem>
 							<TertiaryNavItem
 								path="/tools"
-								component={
-									this.state.tokenIsValid
-										? this.Tools
-										: this.tokenInput
-								}
+								component={this.Tools}
 							>
 								Tools
 							</TertiaryNavItem>

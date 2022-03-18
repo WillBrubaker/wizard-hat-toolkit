@@ -25,3 +25,7 @@ div.gh-token svg {
 div#wootertiarynav ul {
     width: auto;
 }
+
+div#wc-settings li, div#product-settings {
+    list-style: disc;
+}

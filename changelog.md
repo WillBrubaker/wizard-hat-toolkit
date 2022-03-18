@@ -1,6 +1,7 @@
 ## Changelog
 
-### 1.1-beta-2 TBD
+### 1.1-beta.2 TBD
+* Week 2 Day 1 content added.
 * 
 
 ### 1.1-beta 16 March 2022
