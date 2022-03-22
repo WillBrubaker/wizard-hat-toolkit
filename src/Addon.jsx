@@ -374,7 +374,7 @@ export default class Boilerplate extends Component {
 										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
 
 										<p>
-											<Button onClick={ this.installBundleAddonPlugins } className="woo button">
+											<Button onClick={this.installBundleAddonPlugins} className="woo button">
 												Install Plugins
 											</Button>
 										</p>
@@ -560,6 +560,24 @@ export default class Boilerplate extends Component {
 		</div>
 	);
 
+	Troubleshooting = () => (
+		<div>
+			<Card>
+				<p>This is the troubleshooting section</p>
+			</Card>
+		</div>
+	);
+
+	pluginManagement = () => (
+		<div>
+			<Card>
+				<p>
+					This is the plugin management section
+				</p>
+			</Card>
+		</div>
+	);
+
 	render() {
 		if (
 			"running" ===
@@ -571,6 +589,9 @@ export default class Boilerplate extends Component {
 					{this.renderError()}
 					<div id="wootertiarynav">
 						<TertiaryNav>
+							<Title style={{ margin: "1em" }}>
+								Utilities
+							</Title>
 							<TertiaryNavItem
 								path="/shop-config"
 								component={
@@ -582,10 +603,12 @@ export default class Boilerplate extends Component {
 								Shop Config Options
 							</TertiaryNavItem>
 							<TertiaryNavItem
-								path="/tools"
-								component={this.Tools}
+								path="/pluginManagement"
+								component={this.state.tokenIsValid
+									? this.pluginManagement
+									: this.tokenInput}
 							>
-								Tools
+								Plugin Management
 							</TertiaryNavItem>
 							<TertiaryNavItem
 								path="/excercises"
@@ -610,6 +633,18 @@ export default class Boilerplate extends Component {
 								}
 							>
 								Week 2
+							</TertiaryNavItem>
+							<Divider />
+							<Title style={{ margin: "1em" }}>
+								Troubleshooting
+							</Title>
+							<TertiaryNavItem
+								path="/troubleshooting"
+								component={
+									this.Troubleshooting
+								}
+							>
+								Lessons
 							</TertiaryNavItem>
 						</TertiaryNav>
 					</div>

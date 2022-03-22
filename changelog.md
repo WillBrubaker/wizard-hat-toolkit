@@ -2,7 +2,7 @@
 
 ### 1.1-beta.2 TBD
 * Week 2 Day 1 content added.
-* 
+* Week 2 Day 2 content added.
 
 ### 1.1-beta 16 March 2022
 * Add functionality to validate GH tokens against the `repo` scope.
