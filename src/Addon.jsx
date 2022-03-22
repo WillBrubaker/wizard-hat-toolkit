@@ -17,8 +17,8 @@ import {
 	Card,
 	InputPasswordToggle,
 	Divider,
-	AdvancedToggle,
 	List,
+	TextButton,
 } from "@getflywheel/local-components";
 
 export default class Boilerplate extends Component {
@@ -31,6 +31,7 @@ export default class Boilerplate extends Component {
 			localeSwitchedTo: "",
 			showSpinner: false,
 			tokenIsValid: false,
+			dayContent: 1,
 		};
 
 		this.hideInstructions = this.hideInstructions.bind(this);
@@ -167,151 +168,262 @@ export default class Boilerplate extends Component {
 	}
 
 	weekContent(week) {
+		let weekContent;
 		if (2 === week) {
-			const content = () => (
-				<div id="week-2-content">
-					<Card
-						title={<Title style={{ margin: "1em" }}>Day 1</Title>}
-						content={
-							<div>
-								<p>
-									Today you will be installing WooCommerce and demo content and becoming familiar with the settings.
-								</p>
-								<p>If you haven't already installed WooCommerce or imported the demo content, you can use the buttons below.</p>
-								<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
-
-								<p>
-									<Button className="woo button">
-										Install WooCommerce
-									</Button>
-								</p>
-								<p>
-									<Button className="woo button">
-										Install Demo Content
-									</Button>
-								</p>
-								<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
-
-								<div style={{ width: "100%", float: "left" }}>
-									<List style={{ width: "100%" }} id="wc-settings" bullets={true} headerHasDivider={true} headerText={<a
-										href={`http://${this.props.sites[
-											this.props.match.params
-												.siteID
-										].domain
-											}/wp-admin/admin.php?page=wc-settings`}
-									>
-										Visit WooCommerce Settings Page
-									</a>}
-										listItemFontWeight="300">
-										<li>
-											<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#general-settings">General Settings Documentation</a>
-										</li>
-										<li>
-											<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-general-settings">Review General Settings</a>
-										</li>
-									</List>
-									<List style={{ width: "100%" }} id="product-settings" bullets={true} headerHasDivider={true} headerText={<a
-										href={`http://${this.props.sites[
-											this.props.match.params
-												.siteID
-										].domain
-											}/wp-admin/admin.php?page=wc-settings&tab=products`}
-									>
-										Visit WooCommerce Product Settings Page
-									</a>} listItemFontWeight="300">
-										<li>
-											<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#product-settings">Products Settings Documentation</a>
-										</li>
-										<li>
-											<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-product-settings">Review Product Settings</a>
-										</li>
-									</List>
-									<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
-										href={`http://${this.props.sites[
-											this.props.match.params
-												.siteID
-										].domain
-											}/wp-admin/admin.php?page=wc-settings&tab=products&section=inventory`}
-									>
-										Visit Inventory Options Page
-									</a>}
-										listItemFontWeight="300">
-										<li>
-											<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#products-inventory-options">Inventory Options Documentation</a>
-										</li>
-										<li>
-											<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-inventory-options">Review Inventory Options</a>
-										</li>
-									</List>
-									<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
-										href={`http://${this.props.sites[
-											this.props.match.params
-												.siteID
-										].domain
-											}/wp-admin/admin.php?page=wc-settings&tab=products&section=downloadable`}
-									>
-										Visit Downloadable Products Settings
-									</a>}
-										listItemFontWeight="300">
-										<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#products-downloadable-products">Downloadable Products Documentation</a>
-
-										<li>
-										<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-downloadable-product-settings">Review Downloadable Products Settings</a>
-										</li>
-									</List>
-									<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
-										href={`http://${this.props.sites[
-											this.props.match.params
-												.siteID
-										].domain
-											}/wp-admin/admin.php?page=wc-settings&tab=tax`}
-									>
-										Visit Tax Settings
-									</a>}
-										listItemFontWeight="300">
-										<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/">Tax Settings Documentation</a>
-
-										<li>
-										<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-tax-settings">Review Tax Settings</a>
-										</li>
-									</List>
-								</div>
-							</div>
-						}
-					/>
-
-					<Card
-						content={
-							<div>
-								<AdvancedToggle headingText={"Day 2"}>
-									<p>Today you will be doing Day 2 things</p>
-									<ul
-										style={{ listStyle: "none" }}
-										class="wizard-hat"
-									>
-										<li>
-											<Button className="woo button">
-												Day2 Action1
-											</Button>
-										</li>
-										<li>
-											<Button className="woo button">
-												Day2 Action2
-											</Button>
-										</li>
-									</ul>
-								</AdvancedToggle>
-							</div>
-						}
-						footer={
-
-						}
-					/>
+			weekContent = () => (
+				<div>
+					<div id="week-1-content">
+						<TextButton onClick={() => { this.setState({ dayContent: 1 }) }} >Day One</TextButton>
+						<TextButton onClick={() => { this.setState({ dayContent: 2 }) }} >Day Two</TextButton>
+						<TextButton onClick={() => { this.setState({ dayContent: 3 }) }} >Day Three</TextButton>
+						<TextButton onClick={() => { this.setState({ dayContent: 4 }) }} >Day Four</TextButton>
+						<TextButton onClick={() => { this.setState({ dayContent: 5 }) }} >Day Five</TextButton>
+						{this.dayContent(2)}
+					</div>
 				</div>
+
 			);
-			return content;
+			return weekContent;
 		}
 		return null;
+	}
+
+	installBundleAddonPlugins() {
+		ipcRenderer.send("install-bundle-addon-plugins");
+	}
+
+	dayContent(week) {
+		let todayContent;
+		switch (week) {
+			case 2:
+				switch (this.state.dayContent) {
+					case 1:
+						return (
+							<Card
+								title={<Title style={{ margin: "1em" }}>Day 1</Title>}
+								content={
+									<div>
+										<p>
+											Today you will be installing WooCommerce and demo content and becoming familiar with the settings.
+										</p>
+										<p>If you haven't already installed WooCommerce or imported the demo content, you can use the buttons below.</p>
+										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
+
+										<p>
+											<Button className="woo button">
+												Install WooCommerce
+											</Button>
+										</p>
+										<p>
+											<Button className="woo button">
+												Install Demo Content
+											</Button>
+										</p>
+										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
+
+										<div id="list" style={{ width: "100%", float: "left" }}>
+											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
+												href={`http://${this.props.sites[
+													this.props.match.params
+														.siteID
+												].domain
+													}/wp-admin/admin.php?page=wc-settings`}
+											>
+												Visit WooCommerce Settings Page
+											</a>}
+												listItemFontWeight="300">
+												<li>
+													<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#general-settings">General Settings Documentation</a>
+												</li>
+												<li>
+													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-general-settings">Review General Settings</a>
+												</li>
+											</List>
+											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
+												href={`http://${this.props.sites[
+													this.props.match.params
+														.siteID
+												].domain
+													}/wp-admin/admin.php?page=wc-settings&tab=products`}
+											>
+												Visit WooCommerce Product Settings Page
+											</a>} listItemFontWeight="300">
+												<li>
+													<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#product-settings">Products Settings Documentation</a>
+												</li>
+												<li>
+													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-product-settings">Review Product Settings</a>
+												</li>
+											</List>
+											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
+												href={`http://${this.props.sites[
+													this.props.match.params
+														.siteID
+												].domain
+													}/wp-admin/admin.php?page=wc-settings&tab=products&section=inventory`}
+											>
+												Visit Inventory Options Page
+											</a>}
+												listItemFontWeight="300">
+												<li>
+													<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#products-inventory-options">Inventory Options Documentation</a>
+												</li>
+												<li>
+													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-inventory-options">Review Inventory Options</a>
+												</li>
+											</List>
+											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
+												href={`http://${this.props.sites[
+													this.props.match.params
+														.siteID
+												].domain
+													}/wp-admin/admin.php?page=wc-settings&tab=products&section=downloadable`}
+											>
+												Visit Downloadable Products Settings
+											</a>}
+												listItemFontWeight="300">
+												<li>
+													<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#products-downloadable-products">Downloadable Products Documentation</a>
+												</li>
+												<li>
+													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-downloadable-product-settings">Review Downloadable Products Settings</a>
+												</li>
+											</List>
+											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
+												href={`http://${this.props.sites[
+													this.props.match.params
+														.siteID
+												].domain
+													}/wp-admin/admin.php?page=wc-settings&tab=tax`}
+											>
+												Visit Tax Settings
+											</a>}
+												listItemFontWeight="300">
+												<li>
+													<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/">Tax Settings Documentation</a>
+												</li>
+												<li>
+													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-tax-settings">Review Tax Settings</a>
+												</li>
+											</List>
+										</div>
+									</div>
+								}
+							/>
+						);
+					case 2:
+						return (
+							<Card
+								title={<Title style={{ margin: "1em" }}>Day 2</Title>}
+								content={
+									<div>
+										<p>
+											Today you will be reviewing the WooCommerce system status report and the system tools included with WooCommerce.
+										</p>
+										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
+
+										<div id="list" style={{ width: "100%", float: "left" }}>
+											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
+												href={`http://${this.props.sites[
+													this.props.match.params
+														.siteID
+												].domain
+													}/wp-admin/admin.php?page=wc-status`}
+											>
+												Visit WooCommerce System Status Report
+											</a>}
+												listItemFontWeight="300">
+												<li>
+													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/">Understanding the WooCommerce System Status Report</a>
+												</li>
+												<li>
+													<a href="https://wooniversity.wordpress.com/troubleshooting/the-system-status-report-ssr/">The System Status Report (SSR)</a>
+												</li>
+											</List>
+											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
+												href={`http://${this.props.sites[
+													this.props.match.params
+														.siteID
+												].domain
+													}/wp-admin/admin.php?page=wc-status&tab=tools`}
+											>
+												Visit WooCommerce System Tools
+											</a>} listItemFontWeight="300">
+												<li>
+													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/#section-16">System Tools Documentation</a>
+												</li>
+												<li>
+													<a href="https://wooniversity.wordpress.com/troubleshooting/woocommerce-system-tools/">WooCommerce System Tools</a>
+												</li>
+											</List>
+										</div>
+									</div>
+								}
+							/>
+						);
+					case 3:
+						return (
+							<Card
+								title={<Title style={{ margin: "1em" }}>Day 2</Title>}
+								content={
+									<div>
+										<p>
+											Today you will be diving into extensions on the WooCommerce Marketplace with a focus on bundles and add-ons. You will also start to get into troubleshooting WooCommerce.
+										</p>
+										<p>Use the button below to install all of the necessary plugins for today's agenda.</p>
+										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
+
+										<p>
+											<Button onClick={ this.installBundleAddonPlugins } className="woo button">
+												Install Plugins
+											</Button>
+										</p>
+										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
+
+										<div id="list" style={{ width: "100%", float: "left" }}>
+											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
+												href={`http://${this.props.sites[
+													this.props.match.params
+														.siteID
+												].domain
+													}/wp-admin/admin.php?page=wc-status`}
+											>
+												Visit WooCommerce System Status Report
+											</a>}
+												listItemFontWeight="300">
+												<li>
+													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/">Understanding the WooCommerce System Status Report</a>
+												</li>
+												<li>
+													<a href="https://wooniversity.wordpress.com/troubleshooting/the-system-status-report-ssr/">The System Status Report (SSR)</a>
+												</li>
+											</List>
+											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
+												href={`http://${this.props.sites[
+													this.props.match.params
+														.siteID
+												].domain
+													}/wp-admin/admin.php?page=wc-status&tab=tools`}
+											>
+												Visit WooCommerce System Tools
+											</a>} listItemFontWeight="300">
+												<li>
+													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/#section-16">System Tools Documentation</a>
+												</li>
+												<li>
+													<a href="https://wooniversity.wordpress.com/troubleshooting/woocommerce-system-tools/">WooCommerce System Tools</a>
+												</li>
+											</List>
+										</div>
+									</div>
+								}
+							/>
+						);
+					default:
+						return null;
+				}
+		};
+
 	}
 
 	storeConfig = () => (

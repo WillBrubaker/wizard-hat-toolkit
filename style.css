@@ -26,6 +26,6 @@ div#wootertiarynav ul {
     width: auto;
 }
 
-div#wc-settings li, div#product-settings {
+#list li {
     list-style: disc;
 }
