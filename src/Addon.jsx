@@ -32,6 +32,7 @@ export default class Boilerplate extends Component {
 			showSpinner: false,
 			tokenIsValid: false,
 			dayContent: 1,
+			rootPath: props.sites[props.match.params.siteID].path,
 		};
 
 		this.hideInstructions = this.hideInstructions.bind(this);
@@ -39,6 +40,7 @@ export default class Boilerplate extends Component {
 		this.showSpinner = this.showSpinner.bind(this);
 		this.testRequest = this.testRequest.bind(this);
 		this.launchPostman = this.launchPostman.bind(this);
+		this.installWoocommerce = this.installWoocommerce.bind(this);
 	}
 
 	componentDidMount() {
@@ -68,6 +70,12 @@ export default class Boilerplate extends Component {
 
 		ipcRenderer.on("debug-message", (event, args) => {
 			console.info(args);
+		});
+
+		ipcRenderer.on("spinner-done", () => {
+			this.setState({
+				showSpinner: false,
+			})
 		});
 
 		ipcRenderer.send("validate-token");
@@ -192,6 +200,13 @@ export default class Boilerplate extends Component {
 		ipcRenderer.send("install-bundle-addon-plugins");
 	}
 
+	installWoocommerce() {
+		this.setState({
+			showSpinner: true,
+		});
+		ipcRenderer.send("install-woocommerce", this.state.siteId, this.state.rootPath);
+	}
+
 	dayContent(week) {
 		let todayContent;
 		switch (week) {
@@ -206,17 +221,13 @@ export default class Boilerplate extends Component {
 										<p>
 											Today you will be installing WooCommerce and demo content and becoming familiar with the settings.
 										</p>
-										<p>If you haven't already installed WooCommerce or imported the demo content, you can use the buttons below.</p>
+										<p>If you haven't already installed WooCommerce or imported the demo content, you can use the button below.</p>
 										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
 
 										<p>
-											<Button className="woo button">
-												Install WooCommerce
-											</Button>
-										</p>
-										<p>
-											<Button className="woo button">
-												Install Demo Content
+											<Button className="woo button" onClick={this.installWoocommerce}>
+												Install WooCommerce & Demo Content
+												{this.renderSpinner()}
 											</Button>
 										</p>
 										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
