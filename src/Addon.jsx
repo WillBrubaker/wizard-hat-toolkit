@@ -60,12 +60,6 @@ export default class Boilerplate extends Component {
 			});
 		});
 
-		ipcRenderer.on("spinner-done", (event) => {
-			this.setState({
-				showSpinner: false,
-			});
-		});
-
 		ipcRenderer.on("gh-token", (event, args) => {
 			this.setState({
 				tokenIsValid: args.valid,
@@ -84,7 +78,6 @@ export default class Boilerplate extends Component {
 		ipcRenderer.removeAllListeners("error");
 		ipcRenderer.removeAllListeners("gh-token");
 		ipcRenderer.removeAllListeners("debug-message");
-		ipcRenderer.removeAllListeners("spinner-done");
 	}
 
 	hideInstructions() {
@@ -199,13 +192,6 @@ export default class Boilerplate extends Component {
 		ipcRenderer.send("install-bundle-addon-plugins");
 	}
 
-	installWoocommerce() {
-		this.setState({
-			showSpinner: true,
-		});
-		ipcRenderer.send("install-woocommerce", this.state.siteId);
-	}
-
 	dayContent(week) {
 		let todayContent;
 		switch (week) {
@@ -224,9 +210,7 @@ export default class Boilerplate extends Component {
 										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
 
 										<p>
-											<Button onClick={this.installWoocommerce} 
-										 className="woo button">
-											{this.renderSpinner}
+											<Button className="woo button">
 												Install WooCommerce
 											</Button>
 										</p>
