@@ -15,10 +15,6 @@ export default function (context) {
 		download("", "");
 	});
 	
-	ipcMain.on("install-woocommerce", async () => {
-		LocalMain.sendIPCEvent("spinner-done");
-	});
-	
 	ipcMain.on("set-user-token", (event, token) => {
 		process.env.GITHUB_TOKEN = token;
 		LocalMain.sendIPCEvent("validate-token");
