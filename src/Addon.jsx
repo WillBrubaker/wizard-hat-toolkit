@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { ipcRenderer } from "electron";
+import Select from "react-select";
+
 const { exec } = require("child_process");
 
 // https://getflywheel.github.io/local-addon-api/modules/_local_renderer_.html
@@ -21,6 +23,8 @@ import {
 	TextButton,
 } from "@getflywheel/local-components";
 
+let pluginsToInstall = [];
+
 export default class Boilerplate extends Component {
 	constructor(props) {
 		super(props);
@@ -33,6 +37,9 @@ export default class Boilerplate extends Component {
 			tokenIsValid: false,
 			dayContent: 1,
 			rootPath: props.sites[props.match.params.siteID].path,
+			premiumPluginSelections: [],
+			installPluginButton: true,
+			pluginsToInstall: [],
 		};
 
 		this.hideInstructions = this.hideInstructions.bind(this);
@@ -41,8 +48,11 @@ export default class Boilerplate extends Component {
 		this.testRequest = this.testRequest.bind(this);
 		this.launchPostman = this.launchPostman.bind(this);
 		this.installWoocommerce = this.installWoocommerce.bind(this);
+		this.handlePluginSelectionChange =
+			this.handlePluginSelectionChange.bind(this);
+		this.installPlugins = this.installPlugins.bind(this);
 	}
-
+	
 	componentDidMount() {
 		ipcRenderer.on("instructions", (event) => {
 			this.setState({
@@ -66,6 +76,13 @@ export default class Boilerplate extends Component {
 			this.setState({
 				tokenIsValid: args.valid,
 			});
+			ipcRenderer.send("get-premium-plugin-selections");
+		});
+
+		ipcRenderer.on("premium-plugin-selections", (event, args) => {
+			this.setState({
+				premiumPluginSelections: args,
+			});
 		});
 
 		ipcRenderer.on("debug-message", (event, args) => {
@@ -75,7 +92,7 @@ export default class Boilerplate extends Component {
 		ipcRenderer.on("spinner-done", () => {
 			this.setState({
 				showSpinner: false,
-			})
+			});
 		});
 
 		ipcRenderer.send("validate-token");
@@ -86,6 +103,7 @@ export default class Boilerplate extends Component {
 		ipcRenderer.removeAllListeners("error");
 		ipcRenderer.removeAllListeners("gh-token");
 		ipcRenderer.removeAllListeners("debug-message");
+		ipcRenderer.removeAllListeners("premium-plugin-selections");
 	}
 
 	hideInstructions() {
@@ -181,15 +199,44 @@ export default class Boilerplate extends Component {
 			weekContent = () => (
 				<div>
 					<div id="week-1-content">
-						<TextButton onClick={() => { this.setState({ dayContent: 1 }) }} >Day One</TextButton>
-						<TextButton onClick={() => { this.setState({ dayContent: 2 }) }} >Day Two</TextButton>
-						<TextButton onClick={() => { this.setState({ dayContent: 3 }) }} >Day Three</TextButton>
-						<TextButton onClick={() => { this.setState({ dayContent: 4 }) }} >Day Four</TextButton>
-						<TextButton onClick={() => { this.setState({ dayContent: 5 }) }} >Day Five</TextButton>
+						<TextButton
+							onClick={() => {
+								this.setState({ dayContent: 1 });
+							}}
+						>
+							Day One
+						</TextButton>
+						<TextButton
+							onClick={() => {
+								this.setState({ dayContent: 2 });
+							}}
+						>
+							Day Two
+						</TextButton>
+						<TextButton
+							onClick={() => {
+								this.setState({ dayContent: 3 });
+							}}
+						>
+							Day Three
+						</TextButton>
+						<TextButton
+							onClick={() => {
+								this.setState({ dayContent: 4 });
+							}}
+						>
+							Day Four
+						</TextButton>
+						<TextButton
+							onClick={() => {
+								this.setState({ dayContent: 5 });
+							}}
+						>
+							Day Five
+						</TextButton>
 						{this.dayContent(2)}
 					</div>
 				</div>
-
 			);
 			return weekContent;
 		}
@@ -200,11 +247,44 @@ export default class Boilerplate extends Component {
 		ipcRenderer.send("install-bundle-addon-plugins");
 	}
 
+	handlePluginSelectionChange(value, action) {
+		if ("select-option" == action.action) {
+			pluginsToInstall.push(action.option.label)
+			this.setState({
+				installPluginButton: false,
+			});
+			this.setState({
+				pluginsToInstall: pluginsToInstall,
+			});
+			console.info(this.state.pluginsToInstall)
+		} else {
+			pluginsToInstall = [];
+			this.setState({
+				installPluginButton: true,
+			});
+			this.setState({
+				pluginsToInstall: pluginsToInstall,
+			});
+		}
+	}
+
+	installPlugins() {
+		this.setState({
+			showSpinner: true,
+		});
+		console.info(this.state.pluginsToInstall)
+		ipcRenderer.send("install-plugins", this.state.pluginsToInstall, this.state.siteId);
+	}
+
 	installWoocommerce() {
 		this.setState({
 			showSpinner: true,
 		});
-		ipcRenderer.send("install-woocommerce", this.state.siteId, this.state.rootPath);
+		ipcRenderer.send(
+			"install-woocommerce",
+			this.state.siteId,
+			this.state.rootPath
+		);
 	}
 
 	dayContent(week) {
@@ -215,106 +295,217 @@ export default class Boilerplate extends Component {
 					case 1:
 						return (
 							<Card
-								title={<Title style={{ margin: "1em" }}>Day 1</Title>}
+								title={
+									<Title style={{ margin: "1em" }}>
+										Day 1
+									</Title>
+								}
 								content={
 									<div>
 										<p>
-											Today you will be installing WooCommerce and demo content and becoming familiar with the settings.
+											Today you will be installing
+											WooCommerce and demo content and
+											becoming familiar with the settings.
 										</p>
-										<p>If you haven't already installed WooCommerce or imported the demo content, you can use the button below.</p>
-										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
+										<p>
+											If you haven't already installed
+											WooCommerce or imported the demo
+											content, you can use the button
+											below.
+										</p>
+										<Divider
+											style={{
+												width: "100%",
+												float: "left",
+												margin: "1em",
+											}}
+										/>
 
 										<p>
-											<Button className="woo button" onClick={this.installWoocommerce}>
-												Install WooCommerce & Demo Content
+											<Button
+												className="woo button"
+												onClick={
+													this.installWoocommerce
+												}
+											>
+												Install WooCommerce & Demo
+												Content
 												{this.renderSpinner()}
 											</Button>
 										</p>
-										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
+										<Divider
+											style={{
+												width: "100%",
+												float: "left",
+												margin: "1em",
+											}}
+										/>
 
-										<div id="list" style={{ width: "100%", float: "left" }}>
-											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
-												href={`http://${this.props.sites[
-													this.props.match.params
-														.siteID
-												].domain
-													}/wp-admin/admin.php?page=wc-settings`}
+										<div
+											id="list"
+											style={{
+												width: "100%",
+												float: "left",
+											}}
+										>
+											<List
+												style={{ width: "100%" }}
+												bullets={true}
+												headerHasDivider={true}
+												headerText={
+													<a
+														href={`http://${
+															this.props.sites[
+																this.props.match
+																	.params
+																	.siteID
+															].domain
+														}/wp-admin/admin.php?page=wc-settings`}
+													>
+														Visit WooCommerce
+														Settings Page
+													</a>
+												}
+												listItemFontWeight="300"
 											>
-												Visit WooCommerce Settings Page
-											</a>}
-												listItemFontWeight="300">
 												<li>
-													<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#general-settings">General Settings Documentation</a>
+													<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#general-settings">
+														General Settings
+														Documentation
+													</a>
 												</li>
 												<li>
-													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-general-settings">Review General Settings</a>
+													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-general-settings">
+														Review General Settings
+													</a>
 												</li>
 											</List>
-											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
-												href={`http://${this.props.sites[
-													this.props.match.params
-														.siteID
-												].domain
-													}/wp-admin/admin.php?page=wc-settings&tab=products`}
+											<List
+												style={{ width: "100%" }}
+												bullets={true}
+												headerHasDivider={true}
+												headerText={
+													<a
+														href={`http://${
+															this.props.sites[
+																this.props.match
+																	.params
+																	.siteID
+															].domain
+														}/wp-admin/admin.php?page=wc-settings&tab=products`}
+													>
+														Visit WooCommerce
+														Product Settings Page
+													</a>
+												}
+												listItemFontWeight="300"
 											>
-												Visit WooCommerce Product Settings Page
-											</a>} listItemFontWeight="300">
 												<li>
-													<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#product-settings">Products Settings Documentation</a>
+													<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#product-settings">
+														Products Settings
+														Documentation
+													</a>
 												</li>
 												<li>
-													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-product-settings">Review Product Settings</a>
+													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-product-settings">
+														Review Product Settings
+													</a>
 												</li>
 											</List>
-											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
-												href={`http://${this.props.sites[
-													this.props.match.params
-														.siteID
-												].domain
-													}/wp-admin/admin.php?page=wc-settings&tab=products&section=inventory`}
+											<List
+												style={{ width: "100%" }}
+												bullets={true}
+												headerHasDivider={true}
+												headerText={
+													<a
+														href={`http://${
+															this.props.sites[
+																this.props.match
+																	.params
+																	.siteID
+															].domain
+														}/wp-admin/admin.php?page=wc-settings&tab=products&section=inventory`}
+													>
+														Visit Inventory Options
+														Page
+													</a>
+												}
+												listItemFontWeight="300"
 											>
-												Visit Inventory Options Page
-											</a>}
-												listItemFontWeight="300">
 												<li>
-													<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#products-inventory-options">Inventory Options Documentation</a>
+													<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#products-inventory-options">
+														Inventory Options
+														Documentation
+													</a>
 												</li>
 												<li>
-													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-inventory-options">Review Inventory Options</a>
+													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-inventory-options">
+														Review Inventory Options
+													</a>
 												</li>
 											</List>
-											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
-												href={`http://${this.props.sites[
-													this.props.match.params
-														.siteID
-												].domain
-													}/wp-admin/admin.php?page=wc-settings&tab=products&section=downloadable`}
+											<List
+												style={{ width: "100%" }}
+												bullets={true}
+												headerHasDivider={true}
+												headerText={
+													<a
+														href={`http://${
+															this.props.sites[
+																this.props.match
+																	.params
+																	.siteID
+															].domain
+														}/wp-admin/admin.php?page=wc-settings&tab=products&section=downloadable`}
+													>
+														Visit Downloadable
+														Products Settings
+													</a>
+												}
+												listItemFontWeight="300"
 											>
-												Visit Downloadable Products Settings
-											</a>}
-												listItemFontWeight="300">
 												<li>
-													<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#products-downloadable-products">Downloadable Products Documentation</a>
+													<a href="https://woocommerce.com/document/configuring-woocommerce-settings/#products-downloadable-products">
+														Downloadable Products
+														Documentation
+													</a>
 												</li>
 												<li>
-													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-downloadable-product-settings">Review Downloadable Products Settings</a>
+													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-downloadable-product-settings">
+														Review Downloadable
+														Products Settings
+													</a>
 												</li>
 											</List>
-											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
-												href={`http://${this.props.sites[
-													this.props.match.params
-														.siteID
-												].domain
-													}/wp-admin/admin.php?page=wc-settings&tab=tax`}
+											<List
+												style={{ width: "100%" }}
+												bullets={true}
+												headerHasDivider={true}
+												headerText={
+													<a
+														href={`http://${
+															this.props.sites[
+																this.props.match
+																	.params
+																	.siteID
+															].domain
+														}/wp-admin/admin.php?page=wc-settings&tab=tax`}
+													>
+														Visit Tax Settings
+													</a>
+												}
+												listItemFontWeight="300"
 											>
-												Visit Tax Settings
-											</a>}
-												listItemFontWeight="300">
 												<li>
-													<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/">Tax Settings Documentation</a>
+													<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/">
+														Tax Settings
+														Documentation
+													</a>
 												</li>
 												<li>
-													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-tax-settings">Review Tax Settings</a>
+													<a href="https://wooniversity.wordpress.com/onboarding/woo-crash-course-woocommerce-101/#review-tax-settings">
+														Review Tax Settings
+													</a>
 												</li>
 											</List>
 										</div>
@@ -325,46 +516,98 @@ export default class Boilerplate extends Component {
 					case 2:
 						return (
 							<Card
-								title={<Title style={{ margin: "1em" }}>Day 2</Title>}
+								title={
+									<Title style={{ margin: "1em" }}>
+										Day 2
+									</Title>
+								}
 								content={
 									<div>
 										<p>
-											Today you will be reviewing the WooCommerce system status report and the system tools included with WooCommerce.
+											Today you will be reviewing the
+											WooCommerce system status report and
+											the system tools included with
+											WooCommerce.
 										</p>
-										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
+										<Divider
+											style={{
+												width: "100%",
+												float: "left",
+												margin: "1em",
+											}}
+										/>
 
-										<div id="list" style={{ width: "100%", float: "left" }}>
-											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
-												href={`http://${this.props.sites[
-													this.props.match.params
-														.siteID
-												].domain
-													}/wp-admin/admin.php?page=wc-status`}
+										<div
+											id="list"
+											style={{
+												width: "100%",
+												float: "left",
+											}}
+										>
+											<List
+												style={{ width: "100%" }}
+												bullets={true}
+												headerHasDivider={true}
+												headerText={
+													<a
+														href={`http://${
+															this.props.sites[
+																this.props.match
+																	.params
+																	.siteID
+															].domain
+														}/wp-admin/admin.php?page=wc-status`}
+													>
+														Visit WooCommerce System
+														Status Report
+													</a>
+												}
+												listItemFontWeight="300"
 											>
-												Visit WooCommerce System Status Report
-											</a>}
-												listItemFontWeight="300">
 												<li>
-													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/">Understanding the WooCommerce System Status Report</a>
+													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/">
+														Understanding the
+														WooCommerce System
+														Status Report
+													</a>
 												</li>
 												<li>
-													<a href="https://wooniversity.wordpress.com/troubleshooting/the-system-status-report-ssr/">The System Status Report (SSR)</a>
+													<a href="https://wooniversity.wordpress.com/troubleshooting/the-system-status-report-ssr/">
+														The System Status Report
+														(SSR)
+													</a>
 												</li>
 											</List>
-											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
-												href={`http://${this.props.sites[
-													this.props.match.params
-														.siteID
-												].domain
-													}/wp-admin/admin.php?page=wc-status&tab=tools`}
+											<List
+												style={{ width: "100%" }}
+												bullets={true}
+												headerHasDivider={true}
+												headerText={
+													<a
+														href={`http://${
+															this.props.sites[
+																this.props.match
+																	.params
+																	.siteID
+															].domain
+														}/wp-admin/admin.php?page=wc-status&tab=tools`}
+													>
+														Visit WooCommerce System
+														Tools
+													</a>
+												}
+												listItemFontWeight="300"
 											>
-												Visit WooCommerce System Tools
-											</a>} listItemFontWeight="300">
 												<li>
-													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/#section-16">System Tools Documentation</a>
+													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/#section-16">
+														System Tools
+														Documentation
+													</a>
 												</li>
 												<li>
-													<a href="https://wooniversity.wordpress.com/troubleshooting/woocommerce-system-tools/">WooCommerce System Tools</a>
+													<a href="https://wooniversity.wordpress.com/troubleshooting/woocommerce-system-tools/">
+														WooCommerce System Tools
+													</a>
 												</li>
 											</List>
 										</div>
@@ -375,54 +618,124 @@ export default class Boilerplate extends Component {
 					case 3:
 						return (
 							<Card
-								title={<Title style={{ margin: "1em" }}>Day 2</Title>}
+								title={
+									<Title style={{ margin: "1em" }}>
+										Day 2
+									</Title>
+								}
 								content={
 									<div>
 										<p>
-											Today you will be diving into extensions on the WooCommerce Marketplace with a focus on bundles and add-ons. You will also start to get into troubleshooting WooCommerce.
+											Today you will be diving into
+											extensions on the WooCommerce
+											Marketplace with a focus on bundles
+											and add-ons. You will also start to
+											get into troubleshooting
+											WooCommerce.
 										</p>
-										<p>Use the button below to install all of the necessary plugins for today's agenda.</p>
-										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
+										<p>
+											Use the button below to install all
+											of the necessary plugins for today's
+											agenda.
+										</p>
+										<Divider
+											style={{
+												width: "100%",
+												float: "left",
+												margin: "1em",
+											}}
+										/>
 
 										<p>
-											<Button onClick={ this.installBundleAddonPlugins } className="woo button">
+											<Button
+												onClick={
+													this
+														.installBundleAddonPlugins
+												}
+												className="woo button"
+											>
 												Install Plugins
 											</Button>
 										</p>
-										<Divider style={{ width: "100%", float: "left", margin: "1em" }} />
+										<Divider
+											style={{
+												width: "100%",
+												float: "left",
+												margin: "1em",
+											}}
+										/>
 
-										<div id="list" style={{ width: "100%", float: "left" }}>
-											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
-												href={`http://${this.props.sites[
-													this.props.match.params
-														.siteID
-												].domain
-													}/wp-admin/admin.php?page=wc-status`}
+										<div
+											id="list"
+											style={{
+												width: "100%",
+												float: "left",
+											}}
+										>
+											<List
+												style={{ width: "100%" }}
+												bullets={true}
+												headerHasDivider={true}
+												headerText={
+													<a
+														href={`http://${
+															this.props.sites[
+																this.props.match
+																	.params
+																	.siteID
+															].domain
+														}/wp-admin/admin.php?page=wc-status`}
+													>
+														Visit WooCommerce System
+														Status Report
+													</a>
+												}
+												listItemFontWeight="300"
 											>
-												Visit WooCommerce System Status Report
-											</a>}
-												listItemFontWeight="300">
 												<li>
-													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/">Understanding the WooCommerce System Status Report</a>
+													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/">
+														Understanding the
+														WooCommerce System
+														Status Report
+													</a>
 												</li>
 												<li>
-													<a href="https://wooniversity.wordpress.com/troubleshooting/the-system-status-report-ssr/">The System Status Report (SSR)</a>
+													<a href="https://wooniversity.wordpress.com/troubleshooting/the-system-status-report-ssr/">
+														The System Status Report
+														(SSR)
+													</a>
 												</li>
 											</List>
-											<List style={{ width: "100%" }} bullets={true} headerHasDivider={true} headerText={<a
-												href={`http://${this.props.sites[
-													this.props.match.params
-														.siteID
-												].domain
-													}/wp-admin/admin.php?page=wc-status&tab=tools`}
+											<List
+												style={{ width: "100%" }}
+												bullets={true}
+												headerHasDivider={true}
+												headerText={
+													<a
+														href={`http://${
+															this.props.sites[
+																this.props.match
+																	.params
+																	.siteID
+															].domain
+														}/wp-admin/admin.php?page=wc-status&tab=tools`}
+													>
+														Visit WooCommerce System
+														Tools
+													</a>
+												}
+												listItemFontWeight="300"
 											>
-												Visit WooCommerce System Tools
-											</a>} listItemFontWeight="300">
 												<li>
-													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/#section-16">System Tools Documentation</a>
+													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/#section-16">
+														System Tools
+														Documentation
+													</a>
 												</li>
 												<li>
-													<a href="https://wooniversity.wordpress.com/troubleshooting/woocommerce-system-tools/">WooCommerce System Tools</a>
+													<a href="https://wooniversity.wordpress.com/troubleshooting/woocommerce-system-tools/">
+														WooCommerce System Tools
+													</a>
 												</li>
 											</List>
 										</div>
@@ -433,8 +746,7 @@ export default class Boilerplate extends Component {
 					default:
 						return null;
 				}
-		};
-
+		}
 	}
 
 	storeConfig = () => (
@@ -571,6 +883,47 @@ export default class Boilerplate extends Component {
 		</div>
 	);
 
+	getPluginSelections() {
+		ipcRenderer.send("get-premium-plugin-selections");
+	}
+
+	pluginManagement = () => (
+		<div
+			style={{
+				flexGrow: "1",
+				overflow: "auto",
+				position: "relative",
+			}}
+			class="woo"
+		>
+			<Card>
+				A la Carte plugin installation
+				<p style={{ width: "90%", margin: "1em" }}>
+					<Select
+						options={this.state.premiumPluginSelections}
+						placeholder={"Select plugin(s) to install..."}
+						onChange={this.handlePluginSelectionChange}
+						isMulti
+						name="plugin_slug"
+					/>
+				</p>
+				<Button
+					disabled={this.state.installPluginButton}
+					onClick={this.installPlugins}
+				>
+					Install
+					{this.renderSpinner()}
+				</Button>
+				<p></p>
+			</Card>
+			<Divider />
+			<Card>
+				Install & Activate Popular Extensions
+				<Button>Install</Button>
+			</Card>
+		</div>
+	);
+
 	render() {
 		if (
 			"running" ===
@@ -582,6 +935,24 @@ export default class Boilerplate extends Component {
 					{this.renderError()}
 					<div id="wootertiarynav">
 						<TertiaryNav>
+							<TertiaryNavItem path="/title">
+								<Title>Onboarding Content</Title>
+							</TertiaryNavItem>
+
+							<TertiaryNavItem
+								path="/week2"
+								component={
+									this.state.tokenIsValid
+										? this.weekContent(2)
+										: this.tokenInput
+								}
+							>
+								Week 2
+							</TertiaryNavItem>
+							<Divider />
+							<TertiaryNavItem path="/title">
+								<Title>Utilities</Title>
+							</TertiaryNavItem>
 							<TertiaryNavItem
 								path="/shop-config"
 								component={
@@ -593,10 +964,24 @@ export default class Boilerplate extends Component {
 								Shop Config Options
 							</TertiaryNavItem>
 							<TertiaryNavItem
+								path="/plugin-management"
+								component={
+									this.state.tokenIsValid
+										? this.pluginManagement
+										: this.tokenInput
+								}
+							>
+								Plugin Management
+							</TertiaryNavItem>
+							<TertiaryNavItem
 								path="/tools"
 								component={this.Tools}
 							>
 								Tools
+							</TertiaryNavItem>
+							<Divider />
+							<TertiaryNavItem path="/title">
+								<Title>Troubleshooting</Title>
 							</TertiaryNavItem>
 							<TertiaryNavItem
 								path="/excercises"
@@ -607,20 +992,6 @@ export default class Boilerplate extends Component {
 								}
 							>
 								Excercises
-							</TertiaryNavItem>
-							<Divider />
-							<Title style={{ margin: "1em" }}>
-								Onbarding Content
-							</Title>
-							<TertiaryNavItem
-								path="/week2"
-								component={
-									this.state.tokenIsValid
-										? this.weekContent(2)
-										: this.tokenInput
-								}
-							>
-								Week 2
 							</TertiaryNavItem>
 						</TertiaryNav>
 					</div>
