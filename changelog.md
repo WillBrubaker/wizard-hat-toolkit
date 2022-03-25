@@ -3,6 +3,8 @@
 ### 1.1-beta.2 TBD
 * Week 2 Day 1 content added.
 * Week 2 Day 2 content added.
+* Install WooCommerce and demo content
+* download any given plugin from the all-plugins repo
 
 ### 1.1-beta 16 March 2022
 * Add functionality to validate GH tokens against the `repo` scope.
