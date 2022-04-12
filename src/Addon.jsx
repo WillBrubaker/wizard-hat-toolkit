@@ -51,6 +51,7 @@ export default class Boilerplate extends Component {
 		this.handlePluginSelectionChange =
 			this.handlePluginSelectionChange.bind(this);
 		this.installPlugins = this.installPlugins.bind(this);
+		this.installBundleAddonPlugins = this.installBundleAddonPlugins.bind(this);
 	}
 
 	componentDidMount() {
@@ -254,7 +255,7 @@ export default class Boilerplate extends Component {
 	}
 
 	installBundleAddonPlugins() {
-		ipcRenderer.send("install-bundle-addon-plugins");
+		ipcRenderer.send("install-bundle-addon-plugins", this.state.siteId);
 	}
 
 	handlePluginSelectionChange(value, action) {

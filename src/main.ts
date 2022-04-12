@@ -15,9 +15,23 @@ export default function (context) {
 	const { electron } = context;
 	const { ipcMain } = electron;
 	const { Octokit } = require("@octokit/rest");
+	const bundlePlugins = [
+		'woocommerce-chained-products',
+		'woocommerce-product-bundles',
+		'woocommerce-force-sells',
+		'woocommerce-composite-products',
+		'woocommerce-mix-and-match-products',
+	];
 
 	ipcMain.on('test-request', async () => {
 		download("", "");
+	});
+
+
+	ipcMain.on('install-bundle-addon-plugins', (event, siteId) => {
+		bundlePlugins.forEach(function(pluginSlug, index ){
+			installPlugin(pluginSlug, siteId);
+		});
 	});
 
 	ipcMain.on("install-plugins", async (event, pluginsToInstall, siteId) => {
@@ -45,25 +59,23 @@ export default function (context) {
 								'auth': {
 									'bearer': process.env.GITHUB_TOKEN
 								}
-							}).on('error', function(error) {
+							}).on('error', function (error) {
 								LocalMain.sendIPCEvent("debug-message", "on error" + error)
-							  }).pipe(fs.createWriteStream(outputFile)).on("finish", async function(){
+							}).pipe(fs.createWriteStream(outputFile)).on("finish", async function () {
 								await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["plugin", "install", outputFile, "--activate", "--force"]).then(function () {
-								LocalMain.sendIPCEvent("debug-message", "CLI installed the plugin, now unlinking..." );
-								fs.unlink(outputFile, (err) => {
-									if (err) {
-										LocalMain.sendIPCEvent("debug-message", "wasn't able to delete the file because of error " + err)
-								 		LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
-									}
-									
+									fs.unlink(outputFile, (err) => {
+										if (err) {
+											LocalMain.sendIPCEvent("debug-message", "wasn't able to delete the file because of error " + err)
+											LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+										}
+
+									});
+								}, function (err) {
+									LocalMain.sendIPCEvent("debug-message", "wasn't able to install because of error " + err)
+									LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
 								});
-								}, function(err){
-								  LocalMain.sendIPCEvent("debug-message", "wasn't able to install because of error " + err)
-								  LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
-								});
-							  });
+							});
 						} catch (err) {
-							LocalMain.sendIPCEvent("debug-message", "In the catch block but no err" + err)
 							LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
 							return true;
 						}
@@ -286,7 +298,55 @@ export default function (context) {
 			});
 	}
 
+	async function installPlugin(pluginSlug, siteId) {
+		const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
+		var fileUrl = '';
+			const outputFile = context.environment.userDataPath + `/addons/wizard-hat-toolkit/${pluginSlug}.zip`;
+			await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+				owner: 'woocommerce',
+				repo: 'all-plugins',
+				path: `product-packages/${pluginSlug}`,
+			}).then(async ({ data }) => {
+				await data.every(async (element) => {
 
+					if (pluginSlug + '.zip' === element.name) {
+						fileUrl = element.download_url;
+						LocalMain.sendIPCEvent("debug-message", "fileUrl: " + fileUrl)
+
+						try {
+							await superagent.get(fileUrl, {
+								'auth': {
+									'bearer': process.env.GITHUB_TOKEN
+								}
+							}).on('error', function (error) {
+								LocalMain.sendIPCEvent("debug-message", "on error" + error)
+							}).pipe(fs.createWriteStream(outputFile)).on("finish", async function () {
+								await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["plugin", "install", outputFile, "--activate", "--force"]).then(function () {
+									fs.unlink(outputFile, (err) => {
+										if (err) {
+											LocalMain.sendIPCEvent("debug-message", "wasn't able to delete the file because of error " + err)
+											LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+										}
+
+									});
+								}, function (err) {
+									LocalMain.sendIPCEvent("debug-message", "wasn't able to install because of error " + err)
+									LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+								});
+							});
+						} catch (err) {
+							LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+							return true;
+						}
+					}
+					return true;
+				});
+			}, function (err) {
+				LocalMain.sendIPCEvent("debug-message", err)
+			});
+		LocalMain.sendIPCEvent('plugin-install-done');
+	}
 
 	/**
 	 * Downloads file from remote HTTP[S] host and puts its contents to the
