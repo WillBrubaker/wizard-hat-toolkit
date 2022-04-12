@@ -7,6 +7,7 @@ process.env.GITHUB_TOKEN = LocalMain.UserData.get('ghToken');
 const { downloadRelease } = require('@terascope/fetch-github-release');
 const { validateGitHubToken, ValidationError } = require('validate-github-token');
 const fs = require('fs');
+const superagent = require('superagent');
 
 let premiumPluginInfo = {};
 let premiumPluginSelections = [];
@@ -26,35 +27,54 @@ export default function (context) {
 		//loop through pluginsToInstall
 		pluginsToInstall.every(async (element) => {
 			var currentPlugin = element;
+			//const outputFile = `/tmp/${element}.zip`;
 			const outputFile = context.environment.userDataPath + `/addons/wizard-hat-toolkit/${element}.zip`;
 			await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
 				owner: 'woocommerce',
 				repo: 'all-plugins',
 				path: `product-packages/${element}`,
-			}).then(({ data }) => {
-				data.every(async (element) => {
+			}).then(async ({ data }) => {
+				await data.every(async (element) => {
 
 					if (currentPlugin + '.zip' === element.name) {
 						fileUrl = element.download_url;
-						await context.request.get(fileUrl, {
-							'auth': {
-								'bearer': process.env.GITHUB_TOKEN
-							}
-						}).on("response", function (response) {
-							LocalMain.sendIPCEvent("debug-message", response);
+						LocalMain.sendIPCEvent("debug-message", "fileUrl: " + fileUrl)
 
-						}).on("error", function (err) {
-							LocalMain.sendIPCEvent("debug-message", err);
-						}).pipe(outputFile);
-						return false;
+						try {
+							await superagent.get(fileUrl, {
+								'auth': {
+									'bearer': process.env.GITHUB_TOKEN
+								}
+							}).on('error', function(error) {
+								LocalMain.sendIPCEvent("debug-message", "on error" + error)
+							  }).pipe(fs.createWriteStream(outputFile)).on("finish", async function(){
+								await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["plugin", "install", outputFile, "--activate", "--force"]).then(function () {
+								LocalMain.sendIPCEvent("debug-message", "CLI installed the plugin, now unlinking..." );
+								fs.unlink(outputFile, (err) => {
+									if (err) {
+										LocalMain.sendIPCEvent("debug-message", "wasn't able to delete the file because of error " + err)
+								 		LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+									}
+									
+								});
+								}, function(err){
+								  LocalMain.sendIPCEvent("debug-message", "wasn't able to install because of error " + err)
+								  LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+								});
+							  });
+						} catch (err) {
+							LocalMain.sendIPCEvent("debug-message", "In the catch block but no err" + err)
+							LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+							return true;
+						}
 					}
 					return true;
-
 				});
 			}, function (err) {
 				LocalMain.sendIPCEvent("debug-message", err)
 			});
 		});
+		LocalMain.sendIPCEvent('plugin-install-done');
 	});
 
 	ipcMain.on("get-premium-plugin-selections", async () => {
@@ -103,7 +123,7 @@ export default function (context) {
 			LocalMain.sendIPCEvent('error');
 			LocalMain.sendIPCEvent('spinner-done');
 		});
-
+		LocalMain.sendIPCEvent("premium-plugin-selections", premiumPluginSelections);
 	});
 
 	ipcMain.on("install-woocommerce", async (event, siteId, path) => {

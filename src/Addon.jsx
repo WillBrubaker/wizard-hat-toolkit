@@ -52,7 +52,7 @@ export default class Boilerplate extends Component {
 			this.handlePluginSelectionChange.bind(this);
 		this.installPlugins = this.installPlugins.bind(this);
 	}
-	
+
 	componentDidMount() {
 		ipcRenderer.on("instructions", (event) => {
 			this.setState({
@@ -93,6 +93,15 @@ export default class Boilerplate extends Component {
 			this.setState({
 				showSpinner: false,
 			});
+			this.setState({
+				pluginsToInstall: [],
+			})
+		});
+
+		ipcRenderer.on("plugin-install-done", () => {
+			this.setState({
+				showSpinner: false,
+			});
 		});
 
 		ipcRenderer.send("validate-token");
@@ -104,6 +113,7 @@ export default class Boilerplate extends Component {
 		ipcRenderer.removeAllListeners("gh-token");
 		ipcRenderer.removeAllListeners("debug-message");
 		ipcRenderer.removeAllListeners("premium-plugin-selections");
+		ipcRenderer.removeAllListeners("plugin-install-done");
 	}
 
 	hideInstructions() {
@@ -249,14 +259,14 @@ export default class Boilerplate extends Component {
 
 	handlePluginSelectionChange(value, action) {
 		if ("select-option" == action.action) {
-			pluginsToInstall.push(action.option.label)
+			pluginsToInstall.push(value.label);
 			this.setState({
 				installPluginButton: false,
 			});
 			this.setState({
 				pluginsToInstall: pluginsToInstall,
 			});
-			console.info(this.state.pluginsToInstall)
+			console.info(this.state.pluginsToInstall);
 		} else {
 			pluginsToInstall = [];
 			this.setState({
@@ -272,8 +282,12 @@ export default class Boilerplate extends Component {
 		this.setState({
 			showSpinner: true,
 		});
-		console.info(this.state.pluginsToInstall)
-		ipcRenderer.send("install-plugins", this.state.pluginsToInstall, this.state.siteId);
+		console.info(this.state.pluginsToInstall);
+		ipcRenderer.send(
+			"install-plugins",
+			this.state.pluginsToInstall,
+			this.state.siteId
+		);
 	}
 
 	installWoocommerce() {
@@ -896,18 +910,19 @@ export default class Boilerplate extends Component {
 			}}
 			class="woo"
 		>
-			<Card>
+			<Card style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}>
 				A la Carte plugin installation
 				<p style={{ width: "90%", margin: "1em" }}>
 					<Select
 						options={this.state.premiumPluginSelections}
-						placeholder={"Select plugin(s) to install..."}
+						placeholder={"Select plugin to install..."}
 						onChange={this.handlePluginSelectionChange}
-						isMulti
 						name="plugin_slug"
+						style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}
 					/>
 				</p>
 				<Button
+					className="woo button"
 					disabled={this.state.installPluginButton}
 					onClick={this.installPlugins}
 				>
@@ -919,7 +934,7 @@ export default class Boilerplate extends Component {
 			<Divider />
 			<Card>
 				Install & Activate Popular Extensions
-				<Button>Install</Button>
+				<Button className="woo button">Install</Button>
 			</Card>
 		</div>
 	);
