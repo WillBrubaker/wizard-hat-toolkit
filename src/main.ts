@@ -7,7 +7,6 @@ process.env.GITHUB_TOKEN = LocalMain.UserData.get('ghToken');
 const { downloadRelease } = require('@terascope/fetch-github-release');
 const { validateGitHubToken, ValidationError } = require('validate-github-token');
 const fs = require('fs');
-const superagent = require('superagent');
 
 let premiumPluginInfo = {};
 let premiumPluginSelections = [];
@@ -29,64 +28,13 @@ export default function (context) {
 
 
 	ipcMain.on('install-bundle-addon-plugins', (event, siteId) => {
-		bundlePlugins.forEach(function(pluginSlug, index ){
-			installPlugin(pluginSlug, siteId);
-		});
+		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
+		installPlugins(bundlePlugins, site);
 	});
 
 	ipcMain.on("install-plugins", async (event, pluginsToInstall, siteId) => {
-		const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
-		var fileUrl = '';
-		//loop through pluginsToInstall
-		pluginsToInstall.every(async (element) => {
-			var currentPlugin = element;
-			//const outputFile = `/tmp/${element}.zip`;
-			const outputFile = context.environment.userDataPath + `/addons/wizard-hat-toolkit/${element}.zip`;
-			await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-				owner: 'woocommerce',
-				repo: 'all-plugins',
-				path: `product-packages/${element}`,
-			}).then(async ({ data }) => {
-				await data.every(async (element) => {
-
-					if (currentPlugin + '.zip' === element.name) {
-						fileUrl = element.download_url;
-						LocalMain.sendIPCEvent("debug-message", "fileUrl: " + fileUrl)
-
-						try {
-							await superagent.get(fileUrl, {
-								'auth': {
-									'bearer': process.env.GITHUB_TOKEN
-								}
-							}).on('error', function (error) {
-								LocalMain.sendIPCEvent("debug-message", "on error" + error)
-							}).pipe(fs.createWriteStream(outputFile)).on("finish", async function () {
-								await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["plugin", "install", outputFile, "--activate", "--force"]).then(function () {
-									fs.unlink(outputFile, (err) => {
-										if (err) {
-											LocalMain.sendIPCEvent("debug-message", "wasn't able to delete the file because of error " + err)
-											LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
-										}
-
-									});
-								}, function (err) {
-									LocalMain.sendIPCEvent("debug-message", "wasn't able to install because of error " + err)
-									LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
-								});
-							});
-						} catch (err) {
-							LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
-							return true;
-						}
-					}
-					return true;
-				});
-			}, function (err) {
-				LocalMain.sendIPCEvent("debug-message", err)
-			});
-		});
-		LocalMain.sendIPCEvent('plugin-install-done');
+		installPlugins(pluginsToInstall, site);
 	});
 
 	ipcMain.on("get-premium-plugin-selections", async () => {
@@ -298,54 +246,23 @@ export default function (context) {
 			});
 	}
 
-	async function installPlugin(pluginSlug, siteId) {
-		const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
-		var fileUrl = '';
-			const outputFile = context.environment.userDataPath + `/addons/wizard-hat-toolkit/${pluginSlug}.zip`;
-			await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-				owner: 'woocommerce',
-				repo: 'all-plugins',
-				path: `product-packages/${pluginSlug}`,
-			}).then(async ({ data }) => {
-				await data.every(async (element) => {
-
-					if (pluginSlug + '.zip' === element.name) {
-						fileUrl = element.download_url;
-						LocalMain.sendIPCEvent("debug-message", "fileUrl: " + fileUrl)
-
-						try {
-							await superagent.get(fileUrl, {
-								'auth': {
-									'bearer': process.env.GITHUB_TOKEN
-								}
-							}).on('error', function (error) {
-								LocalMain.sendIPCEvent("debug-message", "on error" + error)
-							}).pipe(fs.createWriteStream(outputFile)).on("finish", async function () {
-								await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["plugin", "install", outputFile, "--activate", "--force"]).then(function () {
-									fs.unlink(outputFile, (err) => {
-										if (err) {
-											LocalMain.sendIPCEvent("debug-message", "wasn't able to delete the file because of error " + err)
-											LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
-										}
-
-									});
-								}, function (err) {
-									LocalMain.sendIPCEvent("debug-message", "wasn't able to install because of error " + err)
-									LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
-								});
-							});
-						} catch (err) {
+	function installPlugins(pluginsToInstall, site) {
+		downloadPlugins(pluginsToInstall).then(async (zipFiles) => {
+			for (const zipFile of zipFiles ) {
+				await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["plugin", "install", zipFile, "--activate", "--force"]).then(function () {
+					fs.unlink(zipFile, (err) => {
+						if (err) {
 							LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
-							return true;
 						}
-					}
-					return true;
+					});
+				},function(err){
+					LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+					LocalMain.sendIPCEvent('spinner-done');
 				});
-			}, function (err) {
-				LocalMain.sendIPCEvent("debug-message", err)
-			});
-		LocalMain.sendIPCEvent('plugin-install-done');
+			}
+		}).then(() => {
+			LocalMain.sendIPCEvent('spinner-done');
+		});
 	}
 
 	/**
@@ -393,4 +310,63 @@ export default function (context) {
 			LocalMain.sendIPCEvent("debug-message", err);
 		});
 	}
+
+	const downloadZipFromGitHub = (fileUrl: string, outputFile: string) => {
+		return new Promise((resolve, reject) => {
+			try {
+				context.request.get(fileUrl, {
+					'auth': {
+						'bearer': process.env.GITHUB_TOKEN
+					}
+				}).on("error", function (err) {
+					LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+					reject(err);
+				}).pipe(fs.createWriteStream(outputFile)).on('finish', () => {
+					resolve(outputFile);
+				});
+			} catch (err) {
+				LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+				reject(err);
+			}
+		});
+	};
+
+	const getDownloadUrl = (pluginSlug) => {
+		const path = `product-packages/${pluginSlug}`;
+		const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+		return new Promise((resolve, reject) => {
+			octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+				owner: 'woocommerce',
+				repo: 'all-plugins',
+				path: path,
+			}).then(async ({ data }) => {
+				await data.every(async (element) => {
+					if (pluginSlug + '.zip' === element.name) {
+						resolve(element.download_url);
+					}
+				});
+			}, function (err) {
+				LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+				reject(err);
+			});
+		});
+	}
+
+	const downloadPlugins = async (pluginsToInstall) => {
+		let zipFiles = [];
+		for (const pluginSlug of pluginsToInstall) {
+			const outputFile = context.environment.userDataPath + `/addons/wizard-hat-toolkit/${pluginSlug}.zip`;
+			await getDownloadUrl(pluginSlug).then(async (fileUrl: string) => {
+				await downloadZipFromGitHub(fileUrl, outputFile).then((result) => {
+					zipFiles.push(result);
+				}, function (err) {
+					LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+				});
+			}, function (err) {
+				LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+			});
+
+		}
+		return zipFiles;
+	};
 }

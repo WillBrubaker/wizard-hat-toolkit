@@ -40,6 +40,7 @@ export default class Boilerplate extends Component {
 			premiumPluginSelections: [],
 			installPluginButton: true,
 			pluginsToInstall: [],
+			selectedPlugins: null,
 		};
 
 		this.hideInstructions = this.hideInstructions.bind(this);
@@ -95,8 +96,8 @@ export default class Boilerplate extends Component {
 				showSpinner: false,
 			});
 			this.setState({
-				pluginsToInstall: [],
-			})
+				selectedPlugins: null,
+			});
 		});
 
 		ipcRenderer.on("plugin-install-done", () => {
@@ -255,12 +256,19 @@ export default class Boilerplate extends Component {
 	}
 
 	installBundleAddonPlugins() {
+		this.setState({
+			showSpinner: true,
+		});
 		ipcRenderer.send("install-bundle-addon-plugins", this.state.siteId);
 	}
 
 	handlePluginSelectionChange(value, action) {
+		this.setState({
+			selectedPlugins: value,
+		});
 		if ("select-option" == action.action) {
-			pluginsToInstall.push(value.label);
+			pluginsToInstall.push(action.option.label);
+			console.log(pluginsToInstall)
 			this.setState({
 				installPluginButton: false,
 			});
@@ -268,6 +276,16 @@ export default class Boilerplate extends Component {
 				pluginsToInstall: pluginsToInstall,
 			});
 			console.info(this.state.pluginsToInstall);
+		} else if ("remove-value" === action.action ) {
+			const index = pluginsToInstall.indexOf(action.removedValue.label);
+			pluginsToInstall.splice(index, 1);
+			console.info(pluginsToInstall);
+			this.setState({
+				installPluginButton: false,
+			});
+			this.setState({
+				pluginsToInstall: pluginsToInstall,
+			});
 		} else {
 			pluginsToInstall = [];
 			this.setState({
@@ -670,6 +688,7 @@ export default class Boilerplate extends Component {
 												className="woo button"
 											>
 												Install Plugins
+												{this.renderSpinner()}
 											</Button>
 										</p>
 										<Divider
@@ -920,11 +939,14 @@ export default class Boilerplate extends Component {
 						onChange={this.handlePluginSelectionChange}
 						name="plugin_slug"
 						style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}
+						value={this.state.selectedPlugins}
+						isMulti
 					/>
 				</p>
 				<Button
 					className="woo button"
-					disabled={this.state.installPluginButton}
+					//disabled={this.state.installPluginButton}
+					
 					onClick={this.installPlugins}
 				>
 					Install
