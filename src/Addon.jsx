@@ -52,7 +52,8 @@ export default class Boilerplate extends Component {
 		this.handlePluginSelectionChange =
 			this.handlePluginSelectionChange.bind(this);
 		this.installPlugins = this.installPlugins.bind(this);
-		this.installBundleAddonPlugins = this.installBundleAddonPlugins.bind(this);
+		this.installBundleAddonPlugins =
+			this.installBundleAddonPlugins.bind(this);
 	}
 
 	componentDidMount() {
@@ -97,6 +98,9 @@ export default class Boilerplate extends Component {
 			});
 			this.setState({
 				selectedPlugins: null,
+			});
+			this.setState({
+				pluginsToInstall: [],
 			});
 		});
 
@@ -266,20 +270,18 @@ export default class Boilerplate extends Component {
 		this.setState({
 			selectedPlugins: value,
 		});
+		let pluginsToInstall = this.state.pluginsToInstall;
 		if ("select-option" == action.action) {
 			pluginsToInstall.push(action.option.label);
-			console.log(pluginsToInstall)
 			this.setState({
 				installPluginButton: false,
 			});
 			this.setState({
 				pluginsToInstall: pluginsToInstall,
 			});
-			console.info(this.state.pluginsToInstall);
-		} else if ("remove-value" === action.action ) {
+		} else if ("remove-value" === action.action) {
 			const index = pluginsToInstall.indexOf(action.removedValue.label);
 			pluginsToInstall.splice(index, 1);
-			console.info(pluginsToInstall);
 			this.setState({
 				installPluginButton: false,
 			});
@@ -301,7 +303,6 @@ export default class Boilerplate extends Component {
 		this.setState({
 			showSpinner: true,
 		});
-		console.info(this.state.pluginsToInstall);
 		ipcRenderer.send(
 			"install-plugins",
 			this.state.pluginsToInstall,
@@ -662,9 +663,7 @@ export default class Boilerplate extends Component {
 											Today you will be diving into
 											extensions on the WooCommerce
 											Marketplace with a focus on bundles
-											and add-ons. You will also start to
-											get into troubleshooting
-											WooCommerce.
+											and add-ons.
 										</p>
 										<p>
 											Use the button below to install all
@@ -769,6 +768,56 @@ export default class Boilerplate extends Component {
 												<li>
 													<a href="https://wooniversity.wordpress.com/troubleshooting/woocommerce-system-tools/">
 														WooCommerce System Tools
+													</a>
+												</li>
+											</List>
+										</div>
+									</div>
+								}
+							/>
+						);
+					case 4:
+						return (
+							<Card
+								title={
+									<Title style={{ margin: "1em" }}>
+										Day 2
+									</Title>
+								}
+								content={
+									<div>
+										<p>
+											You'll be working with
+											WooCommerce.com accounts today. The only relevant part of your test site would be the WooCommerce.com extensions tab and subscription management.
+										</p>
+										<div>
+										<List
+												style={{ width: "100%" }}
+												bullets={true}
+												headerHasDivider={true}
+												headerText={
+													<a
+														href={`http://${
+															this.props.sites[
+																this.props.match
+																	.params
+																	.siteID
+															].domain
+														}/wp-admin/admin.php?page=wc-addons&section=helper`}
+													>
+														Visit 'My Subscriptions'
+													</a>
+												}
+												listItemFontWeight="300"
+											>
+												<li>
+													<a href="https://woocommerce.com/document/managing-woocommerce-com-subscriptions/">
+													Managing WooCommerce.com Subscriptions
+													</a>
+												</li>
+												<li>
+													<a href="https://wooniversity.wordpress.com/woocommerce-com/woocommerce-accounts/extending-subscriptions/customer-options-for-managing-wccom-subscriptions/">
+													Customer Options for Managing WCcom Subscriptions
 													</a>
 												</li>
 											</List>
@@ -938,7 +987,11 @@ export default class Boilerplate extends Component {
 						placeholder={"Select plugin to install..."}
 						onChange={this.handlePluginSelectionChange}
 						name="plugin_slug"
-						style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}
+						style={{
+							zIndex: 9999,
+							flexGrow: "1",
+							overflow: "visible",
+						}}
 						value={this.state.selectedPlugins}
 						isMulti
 					/>
@@ -946,7 +999,7 @@ export default class Boilerplate extends Component {
 				<Button
 					className="woo button"
 					//disabled={this.state.installPluginButton}
-					
+
 					onClick={this.installPlugins}
 				>
 					Install
