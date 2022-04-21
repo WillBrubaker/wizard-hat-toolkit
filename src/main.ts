@@ -1,6 +1,5 @@
 // https://getflywheel.github.io/local-addon-api/modules/_local_main_.html
 import * as LocalMain from '@getflywheel/local/main';
-import { object } from 'prop-types';
 //LocalMain.UserData.remove('ghToken');
 process.env.GITHUB_TOKEN = LocalMain.UserData.get('ghToken');
 
@@ -14,22 +13,8 @@ export default function (context) {
 	const { electron } = context;
 	const { ipcMain } = electron;
 	const { Octokit } = require("@octokit/rest");
-	const bundlePlugins = [
-		'woocommerce-chained-products',
-		'woocommerce-product-bundles',
-		'woocommerce-force-sells',
-		'woocommerce-composite-products',
-		'woocommerce-mix-and-match-products',
-	];
-
 	ipcMain.on('test-request', async () => {
 		download("", "");
-	});
-
-
-	ipcMain.on('install-bundle-addon-plugins', (event, siteId) => {
-		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
-		installPlugins(bundlePlugins, site);
 	});
 
 	ipcMain.on("install-plugins", async (event, pluginsToInstall, siteId) => {
@@ -38,36 +23,40 @@ export default function (context) {
 	});
 
 	ipcMain.on("get-premium-plugin-selections", async () => {
-		const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-		var pluginSlugs = {};
-		await octokit.request('GET /repos/{owner}/{repo}/commits', {
-			owner: 'woocommerce',
-			repo: 'all-plugins',
-		}).then(async ({ data }) => {
-			await octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
+		if (!premiumPluginSelections.length) {
+			const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+			await octokit.request('GET /repos/{owner}/{repo}/commits', {
 				owner: 'woocommerce',
 				repo: 'all-plugins',
-				tree_sha: data[0].commit.tree.sha,
 			}).then(async ({ data }) => {
-				var targetSha;
-				for (var index in data.tree) {
-					if ("undefined" != typeof data.tree[index] && "product-packages" === data.tree[index].path) {
-						targetSha = data.tree[index].sha;
-						break;
-					}
-				}
 				await octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
 					owner: 'woocommerce',
 					repo: 'all-plugins',
-					tree_sha: targetSha,
+					tree_sha: data[0].commit.tree.sha,
 				}).then(async ({ data }) => {
+					var targetSha;
 					for (var index in data.tree) {
-						if ("tree" === data.tree[index].type) {
-							pluginSlugs[index] = data.tree[index].path;
-							premiumPluginSelections.push({ label: data.tree[index].path, value: index });
+						if ("undefined" != typeof data.tree[index] && "product-packages" === data.tree[index].path) {
+							targetSha = data.tree[index].sha;
+							break;
 						}
 					}
-					premiumPluginInfo = data.tree;
+					await octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
+						owner: 'woocommerce',
+						repo: 'all-plugins',
+						tree_sha: targetSha,
+					}).then(async ({ data }) => {
+						for (var index in data.tree) {
+							if ("tree" === data.tree[index].type) {
+								premiumPluginSelections.push({ label: data.tree[index].path, value: index });
+							}
+						}
+						premiumPluginInfo = data.tree;
+					}, function (err) {
+						LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+						LocalMain.sendIPCEvent('error');
+						LocalMain.sendIPCEvent('spinner-done');
+					});
 				}, function (err) {
 					LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
 					LocalMain.sendIPCEvent('error');
@@ -78,12 +67,8 @@ export default function (context) {
 				LocalMain.sendIPCEvent('error');
 				LocalMain.sendIPCEvent('spinner-done');
 			});
-		}, function (err) {
-			LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
-			LocalMain.sendIPCEvent('error');
-			LocalMain.sendIPCEvent('spinner-done');
-		});
-		LocalMain.sendIPCEvent("premium-plugin-selections", premiumPluginSelections);
+			LocalMain.sendIPCEvent("premium-plugin-selections", premiumPluginSelections);
+		}
 	});
 
 	ipcMain.on("install-woocommerce", async (event, siteId, path) => {
@@ -247,15 +232,28 @@ export default function (context) {
 	}
 
 	function installPlugins(pluginsToInstall, site) {
-		downloadPlugins(pluginsToInstall).then(async (zipFiles) => {
-			for (const zipFile of zipFiles ) {
+		let dotOrgPlugins = [];
+		let premiumPlugins = [];
+		pluginsToInstall.forEach((slug: string) => {
+			const isPremium = obj => obj.label === slug;
+			if (premiumPluginSelections.some(isPremium)) {
+				premiumPlugins.push(slug);
+			} else {
+				dotOrgPlugins.push(slug);
+			}
+		});
+		downloadPlugins(premiumPlugins).then(async (zipFiles) => {
+			zipFiles = zipFiles.concat(dotOrgPlugins)
+			for (const zipFile of zipFiles) {
 				await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["plugin", "install", zipFile, "--activate", "--force"]).then(function () {
-					fs.unlink(zipFile, (err) => {
-						if (err) {
-							LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
-						}
-					});
-				},function(err){
+					if (!dotOrgPlugins.includes(zipFile)) {
+						fs.unlink(zipFile, (err) => {
+							if (err) {
+								LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+							}
+						});
+					}
+				}, function (err) {
 					LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
 					LocalMain.sendIPCEvent('spinner-done');
 				});
@@ -271,7 +269,6 @@ export default function (context) {
 	 */
 	async function getPremiumPluginsData() {
 		const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-		var pluginSlugs = {};
 		await octokit.request('GET /repos/{owner}/{repo}/commits', {
 			owner: 'woocommerce',
 			repo: 'all-plugins',
@@ -295,7 +292,6 @@ export default function (context) {
 				}).then(async ({ data }) => {
 					for (var index in data.tree) {
 						if ("tree" === data.tree[index].type) {
-							pluginSlugs[index] = data.tree[index].path;
 							premiumPluginSelections.push({ name: data.tree[index].path, value: index });
 						}
 					}
@@ -330,6 +326,15 @@ export default function (context) {
 			}
 		});
 	};
+
+	const sortSlugs = (slug) => {
+		return new Promise((resolve, reject) => {
+			const isPremium = obj => obj.label === slug;
+			LocalMain.getServiceContainer().cradle.localLogger.log('info', `slug: ${slug}`);
+			LocalMain.getServiceContainer().cradle.localLogger.log('info', premiumPluginSelections.some(isPremium));
+			resolve(premiumPluginSelections.some(isPremium))
+		});
+	}
 
 	const getDownloadUrl = (pluginSlug) => {
 		const path = `product-packages/${pluginSlug}`;

@@ -21,6 +21,8 @@ import {
 	Divider,
 	List,
 	TextButton,
+	Banner,
+	AdvancedToggle,
 } from "@getflywheel/local-components";
 
 let pluginsToInstall = [];
@@ -260,6 +262,7 @@ export default class Boilerplate extends Component {
 	}
 
 	installBundleAddonPlugins() {
+		console.info("isntalling bundle plugins I guess");
 		this.setState({
 			showSpinner: true,
 		});
@@ -306,6 +309,17 @@ export default class Boilerplate extends Component {
 		ipcRenderer.send(
 			"install-plugins",
 			this.state.pluginsToInstall,
+			this.state.siteId
+		);
+	}
+
+	installAndActivatePlugins(pluginsToInstall) {
+		this.setState({
+			showSpinner: true,
+		});
+		ipcRenderer.send(
+			"install-plugins",
+			pluginsToInstall,
 			this.state.siteId
 		);
 	}
@@ -654,7 +668,7 @@ export default class Boilerplate extends Component {
 							<Card
 								title={
 									<Title style={{ margin: "1em" }}>
-										Day 2
+										Day 3
 									</Title>
 								}
 								content={
@@ -669,6 +683,20 @@ export default class Boilerplate extends Component {
 											Use the button below to install all
 											of the necessary plugins for today's
 											agenda.
+											<Banner
+												variant="warning"
+												icon="warning"
+											>
+												<strong>Note:</strong> Gravity
+												Forms Product Add-ons requires
+												the premium Gravity Forms
+												plugin. See{" "}
+												<a href="https://mc.a8c.com/secret-store/?secret_id=4889">
+													here
+												</a>
+												. This will need to be installed
+												manually.
+											</Banner>
 										</p>
 										<Divider
 											style={{
@@ -680,10 +708,21 @@ export default class Boilerplate extends Component {
 
 										<p>
 											<Button
-												onClick={
-													this
-														.installBundleAddonPlugins
-												}
+												onClick={this.installAndActivatePlugins.bind(
+													this,
+													[
+														"woocommerce-chained-products",
+														"woocommerce-product-bundles",
+														"woocommerce-force-sells",
+														"woocommerce-composite-products",
+														"woocommerce-mix-and-match-products",
+														"woocommerce-product-addons",
+														"woocommerce-checkout-add-ons",
+														"woocommerce-gravityforms-product-addons",
+														"woocommerce-ninjaforms-product-addons",
+														"ninja-forms",
+													]
+												)}
 												className="woo button"
 											>
 												Install Plugins
@@ -781,17 +820,21 @@ export default class Boilerplate extends Component {
 							<Card
 								title={
 									<Title style={{ margin: "1em" }}>
-										Day 2
+										Day 4
 									</Title>
 								}
 								content={
 									<div>
 										<p>
 											You'll be working with
-											WooCommerce.com accounts today. The only relevant part of your test site would be the WooCommerce.com extensions tab and subscription management.
+											WooCommerce.com accounts today. The
+											most relevant part of your test site
+											would be the WooCommerce.com
+											extensions tab and subscription
+											management.
 										</p>
 										<div>
-										<List
+											<List
 												style={{ width: "100%" }}
 												bullets={true}
 												headerHasDivider={true}
@@ -812,12 +855,155 @@ export default class Boilerplate extends Component {
 											>
 												<li>
 													<a href="https://woocommerce.com/document/managing-woocommerce-com-subscriptions/">
-													Managing WooCommerce.com Subscriptions
+														Managing WooCommerce.com
+														Subscriptions
 													</a>
 												</li>
 												<li>
 													<a href="https://wooniversity.wordpress.com/woocommerce-com/woocommerce-accounts/extending-subscriptions/customer-options-for-managing-wccom-subscriptions/">
-													Customer Options for Managing WCcom Subscriptions
+														Customer Options for
+														Managing WCcom
+														Subscriptions
+													</a>
+												</li>
+											</List>
+										</div>
+									</div>
+								}
+							/>
+						);
+					case 5:
+						return (
+							<Card
+								title={
+									<Title style={{ margin: "1em" }}>
+										Day 5
+									</Title>
+								}
+								content={
+									<div>
+										<p>
+											Today you will be working with the
+											Storefront theme, child themes, and
+											associated plugins as well as
+											importing/exporting.
+										</p>
+										<p>
+											Use the button below to install all
+											of the necessary plugins for today's
+											agenda.
+										</p>
+										<Divider
+											style={{
+												width: "100%",
+												float: "left",
+												margin: "1em",
+											}}
+										/>
+
+										<p>
+											<Button
+												onClick={this.installAndActivatePlugins.bind(
+													this,
+													[
+														"storefront-homepage-contact-section",
+														"storefront-hamburger-menu",
+														"storefront-product-sharing",
+														"storefront-footer-bar",
+														"storefront-powerpack",
+														"storefront-mega-menus",
+														"storefront-reviews",
+														"storefront-pricing-tables",
+														"storefront-product-hero",
+														"storefront-blog-customiser",
+														"storefront-parallax-hero",
+														"woocommerce-product-csv-import-suite",
+													]
+												)}
+												className="woo button"
+											>
+												Install Plugins
+												{this.renderSpinner()}
+											</Button>
+										</p>
+										<Divider
+											style={{
+												width: "100%",
+												float: "left",
+												margin: "1em",
+											}}
+										/>
+
+										<div
+											id="list"
+											style={{
+												width: "100%",
+												float: "left",
+											}}
+										>
+											<List
+												style={{ width: "100%" }}
+												bullets={true}
+												headerHasDivider={true}
+												headerText={
+													<a
+														href={`http://${
+															this.props.sites[
+																this.props.match
+																	.params
+																	.siteID
+															].domain
+														}/wp-admin/admin.php?page=wc-status`}
+													>
+														Visit WooCommerce System
+														Status Report
+													</a>
+												}
+												listItemFontWeight="300"
+											>
+												<li>
+													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/">
+														Understanding the
+														WooCommerce System
+														Status Report
+													</a>
+												</li>
+												<li>
+													<a href="https://wooniversity.wordpress.com/troubleshooting/the-system-status-report-ssr/">
+														The System Status Report
+														(SSR)
+													</a>
+												</li>
+											</List>
+											<List
+												style={{ width: "100%" }}
+												bullets={true}
+												headerHasDivider={true}
+												headerText={
+													<a
+														href={`http://${
+															this.props.sites[
+																this.props.match
+																	.params
+																	.siteID
+															].domain
+														}/wp-admin/admin.php?page=wc-status&tab=tools`}
+													>
+														Visit WooCommerce System
+														Tools
+													</a>
+												}
+												listItemFontWeight="300"
+											>
+												<li>
+													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/#section-16">
+														System Tools
+														Documentation
+													</a>
+												</li>
+												<li>
+													<a href="https://wooniversity.wordpress.com/troubleshooting/woocommerce-system-tools/">
+														WooCommerce System Tools
 													</a>
 												</li>
 											</List>
@@ -929,13 +1115,47 @@ export default class Boilerplate extends Component {
 	);
 
 	Excercises = () => (
-		<ul style={{ listStyle: "none" }} class="wizard-hat">
-			<li>
-				<Button onClick={this.testRequest} className="woo button">
-					Test d/l install plugin
-				</Button>
-			</li>
-		</ul>
+		<div
+			style={{
+				flexGrow: "1",
+				overflow: "auto",
+				position: "relative",
+			}}
+			class="woo"
+		>
+			<Card
+				style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}
+			></Card>
+			<Divider />
+			<Card style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}>
+				<ul style={{ listStyle: "none" }} class="wizard-hat">
+					<li>
+						<Button
+							onClick={this.testRequest}
+							className="woo button"
+						>
+							Test d/l install plugin
+						</Button>
+					</li>
+				</ul>
+			</Card>
+			<Divider />
+
+			<Card
+				style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}
+			>
+				<p><h2>Email Troubleshooting</h2></p>
+				<p>A WooCommerce user has submitted a ticket letting us know that the WooCommerce order emails are not being sent as expected.</p>
+				<AdvancedToggle>
+			<p>Hello World!</p>
+		</AdvancedToggle>
+			</Card>
+			<Divider />
+			<Card>
+				Install & Activate Popular Extensions
+				<Button className="woo button">Install</Button>
+			</Card>
+		</div>
 	);
 
 	tokenInput = () => (
