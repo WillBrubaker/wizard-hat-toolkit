@@ -22,6 +22,11 @@ export default function (context) {
 		installPlugins(pluginsToInstall, site);
 	});
 
+	ipcMain.on("site-id", (event, siteId) => {
+		LocalMain.sendIPCEvent('site-id', siteId);
+		LocalMain.getServiceContainer().cradle.localLogger.log("error", "got the site id I guess ¯\_(ツ)_/¯")
+		LocalMain.getServiceContainer().cradle.localLogger.log("error", siteId)
+   });
 	ipcMain.on("get-premium-plugin-selections", async () => {
 		if (!premiumPluginSelections.length) {
 			const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
@@ -67,8 +72,8 @@ export default function (context) {
 				LocalMain.sendIPCEvent('error');
 				LocalMain.sendIPCEvent('spinner-done');
 			});
+		} 
 			LocalMain.sendIPCEvent("premium-plugin-selections", premiumPluginSelections);
-		}
 	});
 
 	ipcMain.on("install-woocommerce", async (event, siteId, path) => {

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { ipcRenderer } from "electron";
 import Select from "react-select";
-
+import Troubleshooting from "./troubleshooting";
 const { exec } = require("child_process");
 
 // https://getflywheel.github.io/local-addon-api/modules/_local_renderer_.html
@@ -23,9 +23,9 @@ import {
 	TextButton,
 	Banner,
 	AdvancedToggle,
+	Stepper,
+	Step,
 } from "@getflywheel/local-components";
-
-let pluginsToInstall = [];
 
 export default class Boilerplate extends Component {
 	constructor(props) {
@@ -110,6 +110,11 @@ export default class Boilerplate extends Component {
 			this.setState({
 				showSpinner: false,
 			});
+		});
+		
+		ipcRenderer.on("install-troubleshooting-plugins", (event, pluginsToInstall) => {
+			console.log(`got plugins to install of ${pluginsToInstall}`)
+			this.installAndActivatePlugins(pluginsToInstall);
 		});
 
 		ipcRenderer.send("validate-token");
@@ -322,6 +327,29 @@ export default class Boilerplate extends Component {
 			pluginsToInstall,
 			this.state.siteId
 		);
+	}
+
+	troubleshootingStep(scenario, step) {
+		console.log(scenario);
+		console.log(step);
+	}
+	activateTroubleshootingStep(scenario, step) {
+		console.log(scenario);
+		console.log(step);
+	}
+
+	stepIsActive(scenario) {
+		console.info(scenario);
+		return false;
+	}
+
+	setUpScenario(scenario) {
+		switch (scenario) {
+			case "email":
+				return scenario;
+			default:
+				return null;
+		}
 	}
 
 	installWoocommerce() {
@@ -729,88 +757,6 @@ export default class Boilerplate extends Component {
 												{this.renderSpinner()}
 											</Button>
 										</p>
-										<Divider
-											style={{
-												width: "100%",
-												float: "left",
-												margin: "1em",
-											}}
-										/>
-
-										<div
-											id="list"
-											style={{
-												width: "100%",
-												float: "left",
-											}}
-										>
-											<List
-												style={{ width: "100%" }}
-												bullets={true}
-												headerHasDivider={true}
-												headerText={
-													<a
-														href={`http://${
-															this.props.sites[
-																this.props.match
-																	.params
-																	.siteID
-															].domain
-														}/wp-admin/admin.php?page=wc-status`}
-													>
-														Visit WooCommerce System
-														Status Report
-													</a>
-												}
-												listItemFontWeight="300"
-											>
-												<li>
-													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/">
-														Understanding the
-														WooCommerce System
-														Status Report
-													</a>
-												</li>
-												<li>
-													<a href="https://wooniversity.wordpress.com/troubleshooting/the-system-status-report-ssr/">
-														The System Status Report
-														(SSR)
-													</a>
-												</li>
-											</List>
-											<List
-												style={{ width: "100%" }}
-												bullets={true}
-												headerHasDivider={true}
-												headerText={
-													<a
-														href={`http://${
-															this.props.sites[
-																this.props.match
-																	.params
-																	.siteID
-															].domain
-														}/wp-admin/admin.php?page=wc-status&tab=tools`}
-													>
-														Visit WooCommerce System
-														Tools
-													</a>
-												}
-												listItemFontWeight="300"
-											>
-												<li>
-													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/#section-16">
-														System Tools
-														Documentation
-													</a>
-												</li>
-												<li>
-													<a href="https://wooniversity.wordpress.com/troubleshooting/woocommerce-system-tools/">
-														WooCommerce System Tools
-													</a>
-												</li>
-											</List>
-										</div>
 									</div>
 								}
 							/>
@@ -926,88 +872,6 @@ export default class Boilerplate extends Component {
 												{this.renderSpinner()}
 											</Button>
 										</p>
-										<Divider
-											style={{
-												width: "100%",
-												float: "left",
-												margin: "1em",
-											}}
-										/>
-
-										<div
-											id="list"
-											style={{
-												width: "100%",
-												float: "left",
-											}}
-										>
-											<List
-												style={{ width: "100%" }}
-												bullets={true}
-												headerHasDivider={true}
-												headerText={
-													<a
-														href={`http://${
-															this.props.sites[
-																this.props.match
-																	.params
-																	.siteID
-															].domain
-														}/wp-admin/admin.php?page=wc-status`}
-													>
-														Visit WooCommerce System
-														Status Report
-													</a>
-												}
-												listItemFontWeight="300"
-											>
-												<li>
-													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/">
-														Understanding the
-														WooCommerce System
-														Status Report
-													</a>
-												</li>
-												<li>
-													<a href="https://wooniversity.wordpress.com/troubleshooting/the-system-status-report-ssr/">
-														The System Status Report
-														(SSR)
-													</a>
-												</li>
-											</List>
-											<List
-												style={{ width: "100%" }}
-												bullets={true}
-												headerHasDivider={true}
-												headerText={
-													<a
-														href={`http://${
-															this.props.sites[
-																this.props.match
-																	.params
-																	.siteID
-															].domain
-														}/wp-admin/admin.php?page=wc-status&tab=tools`}
-													>
-														Visit WooCommerce System
-														Tools
-													</a>
-												}
-												listItemFontWeight="300"
-											>
-												<li>
-													<a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/#section-16">
-														System Tools
-														Documentation
-													</a>
-												</li>
-												<li>
-													<a href="https://wooniversity.wordpress.com/troubleshooting/woocommerce-system-tools/">
-														WooCommerce System Tools
-													</a>
-												</li>
-											</List>
-										</div>
 									</div>
 								}
 							/>
@@ -1141,14 +1005,55 @@ export default class Boilerplate extends Component {
 			</Card>
 			<Divider />
 
-			<Card
-				style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}
-			>
-				<p><h2>Email Troubleshooting</h2></p>
-				<p>A WooCommerce user has submitted a ticket letting us know that the WooCommerce order emails are not being sent as expected.</p>
-				<AdvancedToggle>
-			<p>Hello World!</p>
-		</AdvancedToggle>
+			<Card style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}>
+				<p>
+					<h2>Email Troubleshooting</h2>
+				</p>
+				<p>
+					A WooCommerce user has submitted a ticket letting us know
+					that the WooCommerce order emails are not being sent as
+					expected.
+				</p>
+				<AdvancedToggle
+					headingText="Step 1"
+				>
+					<h3>Are WordPress emails working?</h3>
+					<p>
+						Is this a case of not sending emails or not receiving
+						emails? At the same time, is WordPress sending emails?
+						We can check this by using the{" "}
+						<a href="https://wordpress.org/plugins/wp-test-email/">
+							test email plugin
+						</a>{" "}
+						in conjunction with an{" "}
+						<a href="https://wordpress.org/plugins/wp-mail-logging/">
+							email logging plugin
+						</a>
+						. You can press the button below to install both of
+						those plugins.
+					</p>
+					<p>
+						<Button
+							onClick={() => {console.info("button clickt")}}
+							className="woo button"
+						>
+							{this.renderSpinner()}
+							Install Plugins
+						</Button>
+					</p>
+				</AdvancedToggle>
+
+				<Stepper>
+					<Step
+						number={1}
+						done={false}
+						active={this.stepIsActive("email")}
+					/>
+					<Step number={2} done={false} active={false} />
+					<Step number={3} done={false}>
+						Setup WordPress
+					</Step>
+				</Stepper>
 			</Card>
 			<Divider />
 			<Card>
@@ -1235,6 +1140,10 @@ export default class Boilerplate extends Component {
 		</div>
 	);
 
+	troubleshootingContent() {
+		return new Troubleshooting();		
+	}
+
 	render() {
 		if (
 			"running" ===
@@ -1298,7 +1207,7 @@ export default class Boilerplate extends Component {
 								path="/excercises"
 								component={
 									this.state.tokenIsValid
-										? this.Excercises
+										? this.troubleshootingContent
 										: this.tokenInput
 								}
 							>

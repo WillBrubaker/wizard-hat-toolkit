@@ -29,3 +29,10 @@ div#wootertiarynav ul {
 #list li {
     list-style: disc;
 }
+
+.woo p {
+    width: 100%;
+    float: left;
+    margin: 1em;
+    padding: auto;
+}
