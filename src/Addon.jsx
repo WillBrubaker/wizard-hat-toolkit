@@ -1056,10 +1056,10 @@ export default class Boilerplate extends Component {
 				</Stepper>
 			</Card>
 			<Divider />
-			<Card>
+			{/*<Card>
 				Install & Activate Popular Extensions
 				<Button className="woo button">Install</Button>
-			</Card>
+		</Card>*/}
 		</div>
 	);
 
@@ -1133,10 +1133,10 @@ export default class Boilerplate extends Component {
 				<p></p>
 			</Card>
 			<Divider />
-			<Card>
+			{/*<Card>
 				Install & Activate Popular Extensions
 				<Button className="woo button">Install</Button>
-			</Card>
+					</Card>*/}
 		</div>
 	);
 
@@ -1193,6 +1193,7 @@ export default class Boilerplate extends Component {
 							>
 								Plugin Management
 							</TertiaryNavItem>
+							{/*
 							<TertiaryNavItem
 								path="/tools"
 								component={this.Tools}
@@ -1212,7 +1213,8 @@ export default class Boilerplate extends Component {
 								}
 							>
 								Excercises
-							</TertiaryNavItem>
+							</TertiaryNavItem>*/}
+							
 						</TertiaryNav>
 					</div>
 				</div>
