@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { ipcRenderer } from "electron";
 import Select from "react-select";
-import Troubleshooting from "./troubleshooting";
+import Troubleshooting from "./troubleshooting-excercise";
 const { exec } = require("child_process");
 
 // https://getflywheel.github.io/local-addon-api/modules/_local_renderer_.html
