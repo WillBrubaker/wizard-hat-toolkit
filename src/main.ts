@@ -3,16 +3,16 @@ import * as LocalMain from '@getflywheel/local/main';
 //LocalMain.UserData.remove('ghToken');
 process.env.GITHUB_TOKEN = LocalMain.UserData.get('ghToken');
 
-const { downloadRelease } = require('@terascope/fetch-github-release');
-const { validateGitHubToken, ValidationError } = require('validate-github-token');
-const fs = require('fs');
-
-let premiumPluginInfo = {};
-let premiumPluginSelections = [];
 export default function (context) {
 	const { electron } = context;
 	const { ipcMain } = electron;
+	const { downloadRelease } = require('@terascope/fetch-github-release');
+	const { validateGitHubToken, ValidationError } = require('validate-github-token');
 	const { Octokit } = require("@octokit/rest");
+	const fs = require('fs');
+	let premiumPluginInfo = {};
+	let premiumPluginSelections = [];
+	
 	ipcMain.on('test-request', async () => {
 		download("", "");
 	});
@@ -26,7 +26,7 @@ export default function (context) {
 		LocalMain.sendIPCEvent('site-id', siteId);
 		LocalMain.getServiceContainer().cradle.localLogger.log("error", "got the site id I guess ¯\_(ツ)_/¯")
 		LocalMain.getServiceContainer().cradle.localLogger.log("error", siteId)
-   });
+	});
 	ipcMain.on("get-premium-plugin-selections", async () => {
 		if (!premiumPluginSelections.length) {
 			const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
@@ -72,8 +72,8 @@ export default function (context) {
 				LocalMain.sendIPCEvent('error');
 				LocalMain.sendIPCEvent('spinner-done');
 			});
-		} 
-			LocalMain.sendIPCEvent("premium-plugin-selections", premiumPluginSelections);
+		}
+		LocalMain.sendIPCEvent("premium-plugin-selections", premiumPluginSelections);
 	});
 
 	ipcMain.on("install-woocommerce", async (event, siteId, path) => {
