@@ -1,4 +1,4 @@
-import Addon from './Addon';
+import Wizardhat from './Wizardhat';
 import fs from 'fs-extra';
 import path from 'path';
 const packageJSON = fs.readJsonSync( path.join( __dirname, '../package.json' ) );
@@ -16,7 +16,7 @@ export default function ( context ) {
 	// Create the route/page of content that will be displayed when the menu option is clicked
 	hooks.addContent( 'routesSiteInfo', () =>
 		<Route key={`${addonID}-addon`} path={`/main/site-info/:siteID/${addonID}`}
-			render={( props ) => <Addon {...props} />} /> );
+			render={( props ) => <Wizardhat {...props} />} /> );
 
 	// Add menu option within the site menu bar
 	hooks.addFilter( 'siteInfoMoreMenu', function ( menu, site ) {

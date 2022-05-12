@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { ipcRenderer } from "electron";
 import Select from "react-select";
-//import Troubleshooting from "./troubleshooting-excercise";
+import Troubleshooting from "./troubleshooting-excercise";
 const { exec } = require("child_process");
 // https://getflywheel.github.io/local-addon-api/modules/_local_renderer_.html
 import * as LocalRenderer from '@getflywheel/local/renderer';
@@ -1054,10 +1054,10 @@ export default class Wizardhat extends React.Component {
 				</Stepper>
 			</Card>
 			<Divider />
-			{/*<Card>
+			<Card>
 				Install & Activate Popular Extensions
 				<Button className="woo button">Install</Button>
-		</Card>*/}
+		</Card>
 		</div>
 	);
 
@@ -1131,10 +1131,10 @@ export default class Wizardhat extends React.Component {
 				<p></p>
 			</Card>
 			<Divider />
-			{/*<Card>
+			<Card>
 				Install & Activate Popular Extensions
 				<Button className="woo button">Install</Button>
-					</Card>*/}
+					</Card>
 		</div>
 	);
 
@@ -1191,7 +1191,7 @@ export default class Wizardhat extends React.Component {
 							>
 								Plugin Management
 							</TertiaryNavItem>
-							{/*
+							
 							<TertiaryNavItem
 								path="/tools"
 								component={this.Tools}
@@ -1211,7 +1211,7 @@ export default class Wizardhat extends React.Component {
 								}
 							>
 								Excercises
-							</TertiaryNavItem>*/}
+							</TertiaryNavItem>
 							
 						</TertiaryNav>
 					</div>
