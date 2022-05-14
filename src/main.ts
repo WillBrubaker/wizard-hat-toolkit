@@ -1,13 +1,13 @@
 // https://getflywheel.github.io/local-addon-api/modules/_local_main_.html
 import * as LocalMain from '@getflywheel/local/main';
+//import { downloadRelease } from '@terascope/fetch-github-release';
 //LocalMain.UserData.remove('ghToken');
 process.env.GITHUB_TOKEN = LocalMain.UserData.get('ghToken');
-
 export default function (context) {
 	const { electron } = context;
 	const { ipcMain } = electron;
-	const { downloadRelease } = require('@terascope/fetch-github-release');
 	const { validateGitHubToken, ValidationError } = require('validate-github-token');
+	const { downloadRelease } = require('@terascope/fetch-github-release');
 	const { Octokit } = require("@octokit/rest");
 	const fs = require('fs');
 	let premiumPluginInfo = {};

@@ -1,10 +1,7 @@
 import React, { Component } from "react";
 import { ipcRenderer } from "electron";
-import Select from "react-select";
 import Troubleshooting from "./troubleshooting-excercise";
 const { exec } = require("child_process");
-// https://getflywheel.github.io/local-addon-api/modules/_local_renderer_.html
-import * as LocalRenderer from '@getflywheel/local/renderer';
 // https://github.com/getflywheel/local-components
 import {
 	Button,
@@ -24,7 +21,7 @@ import {
 	Stepper,
 	Step,
 } from "@getflywheel/local-components";
-
+import {Select} from "react-select";
 export default class Wizardhat extends React.Component {
 	constructor(props) {
 		super(props);
