@@ -100,11 +100,11 @@ export default class Troubleshooting extends Component {
 		const textNode = prompts.find(
 			(textNode) => textNode.id === textNodeIndex
 		);
-		//textElement.innerText = textNode.text
-		/*while (optionButtonsElement.firstChild) {
-		  optionButtonsElement.removeChild(optionButtonsElement.firstChild)
-		}*/
 		let elements = [];
+		if ( 23 === textNodeIndex || 18 === textNodeIndex) {
+			console.info(textNode)
+		}
+		
 		textNode.text.forEach((paragraph) => {
 			elements.push(<p><Text fontSize="l">{paragraph}</Text></p>)
 		});
@@ -113,15 +113,6 @@ export default class Troubleshooting extends Component {
 		textNode.options.forEach((option) => {
 			if (this.showOption(option)) {
 				elements.push(<Button onClick={() => {this.setState({textNode: option.nextText}); this.selectOption(option)}} className="woo button">{option.text}</Button>)
-				//const button = document.createElement('button')
-				//button.innerText = option.text
-				//button.classList.add('btn')
-				/*button.addEventListener('click', (event) => {
-			  selectOption(option)
-			  console.info(event)
-			  console.info(option)
-			})
-			optionButtonsElement.appendChild(button)*/
 			}
 		});
 		return elements;
