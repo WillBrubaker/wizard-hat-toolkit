@@ -70,6 +70,7 @@
     },
     "bundleDependencies": [
         "@getflywheel/local-components",
+        "@terascope/fetch-github-release",
         "babel-eslint",
         "classnames",
         "dateformat",
