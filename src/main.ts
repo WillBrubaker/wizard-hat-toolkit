@@ -3,6 +3,7 @@ import * as LocalMain from '@getflywheel/local/main';
 //import { downloadRelease } from '@terascope/fetch-github-release';
 //LocalMain.UserData.remove('ghToken');
 process.env.GITHUB_TOKEN = LocalMain.UserData.get('ghToken');
+var validToken = false;
 export default function (context) {
 	const { electron } = context;
 	const { ipcMain } = electron;
@@ -28,7 +29,7 @@ export default function (context) {
 		LocalMain.getServiceContainer().cradle.localLogger.log("error", siteId)
 	});
 	ipcMain.on("get-premium-plugin-selections", async () => {
-		if (!premiumPluginSelections.length) {
+		if (validToken && !premiumPluginSelections.length) {
 			const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 			await octokit.request('GET /repos/{owner}/{repo}/commits', {
 				owner: 'woocommerce',
@@ -167,9 +168,9 @@ export default function (context) {
 			);
 			LocalMain.UserData.set('ghToken', process.env.GITHUB_TOKEN);
 			LocalMain.sendIPCEvent("gh-token", { "valid": true });
+			validToken = true;
 		} catch (err) {
 			if (err instanceof ValidationError) {
-				LocalMain.sendIPCEvent('debug-message', err);
 				LocalMain.getServiceContainer().cradle.localLogger.log('error', 'error:(');
 				LocalMain.getServiceContainer().cradle.localLogger.log('error', err.message);
 				LocalMain.sendIPCEvent("gh-token", { "valid": false });
