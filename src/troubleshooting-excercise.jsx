@@ -19,6 +19,7 @@ import {
 	Container,
 } from "@getflywheel/local-components";
 import { element } from "prop-types";
+var parse = require('html-react-parser');
 
 export default class Troubleshooting extends Component {
 	constructor(props) {
@@ -26,26 +27,9 @@ export default class Troubleshooting extends Component {
 		this.state = {
 			siteId: null,
 			showSpinner: false,
-			wpEmailSent: false,
-			loggingTestEmailSent: false,
-			wpEmailIsReceived: null,
-			wpEmailIsLogged: null,
-			wpEmailTroubleshootingExhausted: false,
-			adminOrderEmailReceived: null,
-			adminOrderEmailSent: null,
-			testEmailSent: false,
-			emailScenarioSetUp: false,
-			mailLoggingPluginActive: false,
-			postConflictEmailLogged: false,
-			adminOrderEmailTested: false,
-			newOrderStatus: null,
-			newOrderCreated: false,
-			orderStatusFlyoverOpen: false,
-			orderStatusTransitioned: null,
-			transitionedOrderEmailReceieved: null,
-			transitionedOrderEmailLogged: null,
-			orderTransitionedEmailReceived: null,
+			errorFlyoverOpen: false,
 			textNode: 1,
+			checkboxChecked: false,
 		};
 	}
 
@@ -65,10 +49,6 @@ export default class Troubleshooting extends Component {
 		}
 	}
 
-	step14text() {
-		return "Awesome! What step do you take next?";
-	}
-
 	showOption(option) {
 		return option.requiredState == null || option.requiredState(gameState);
 	}
@@ -80,11 +60,18 @@ export default class Troubleshooting extends Component {
 		  return this.startGame()
 		}
 		gameState = Object.assign(gameState, option.setState)
-		console.info(gameState)
 		
-		if ('undefined' != typeof option.action) {
-		  console.info('here is where I would do action ' + option.action)
+		if(option.increment) {
+			let value = gameState[option.increment];
+			value++
+			gameState = Object.assign(gameState, { [option.increment]: value})
 		}
+		
+
+		if ('undefined' != typeof option.action) {
+		  //console.info('here is where I would do action ' + option.action)
+		}
+		
 		return this.showTextNode(this.state.textNode)
 	  }
 
@@ -100,27 +87,25 @@ export default class Troubleshooting extends Component {
 		const textNode = prompts.find(
 			(textNode) => textNode.id === textNodeIndex
 		);
-		let elements = [];
-		if ( 23 === textNodeIndex || 18 === textNodeIndex) {
-			console.info(textNode)
-		}
-		
+		let elements = new Array;		
 		textNode.text.forEach((paragraph) => {
-			elements.push(<p><Text fontSize="l">{paragraph}</Text></p>)
+			elements.push(<p><Text fontSize="l">{parse(paragraph)}</Text></p>)
 		});
+
+		if (textNode.checkboxen) {
+			textNode.checkboxen.forEach((checkbox) => {
+				console.info(gameState)
+				elements.push(<Container style={{ width: "100%", float: "left", fontSize: "17px"}}><Checkbox label={checkbox.label} onChange={(event) => {gameState = Object.assign(gameState, {[checkbox.setState]: event}); this.setState({textNode: checkbox.nextText})} }/></Container>)
+			})
+		}
+
 		textNode.options = this.shuffle(textNode.options);
-		
 		textNode.options.forEach((option) => {
 			if (this.showOption(option)) {
-				elements.push(<Button onClick={() => {this.setState({textNode: option.nextText}); this.selectOption(option)}} className="woo button">{option.text}</Button>)
+				elements.push(<Button onClick={() => {this.setState({textNode: "function" === typeof option.nextText ? option.nextText(gameState) : option.nextText}); gameState = Object.assign(gameState, {lastNode: textNodeIndex}); this.selectOption(option)}} className="woo button">{option.text}</Button>)
 			}
 		});
 		return elements;
-	}
-
-	startGame() {
-		gameState = {};
-		return (this.showTextNode(1));
 	}
 
 	render() {

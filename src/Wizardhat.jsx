@@ -64,6 +64,8 @@ export default class Wizardhat extends React.Component {
 		});
 
 		ipcRenderer.on("error", (event) => {
+			console.info(event)
+			console.info(this.state)
 			this.setState({
 				showError: true,
 			});
@@ -1201,13 +1203,9 @@ export default class Wizardhat extends React.Component {
 							</TertiaryNavItem>
 							<TertiaryNavItem
 								path="/excercises"
-								component={
-									this.state.tokenIsValid
-										? this.troubleshootingContent
-										: this.tokenInput
-								}
+								component={ this.troubleshootingContent }
 							>
-								Excercises
+								Email
 							</TertiaryNavItem>
 							
 						</TertiaryNav>
