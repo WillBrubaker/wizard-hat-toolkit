@@ -23,11 +23,13 @@ export default function (context) {
 		installPlugins(pluginsToInstall, site);
 	});
 
-	ipcMain.on("site-id", (event, siteId) => {
-		LocalMain.sendIPCEvent('site-id', siteId);
-		LocalMain.getServiceContainer().cradle.localLogger.log("error", "got the site id I guess ¯\_(ツ)_/¯")
-		LocalMain.getServiceContainer().cradle.localLogger.log("error", siteId)
-	});
+	ipcMain.on("get-order-id", async (event, siteId) => {
+		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId); 
+		await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["post", "list", "--post_type=shop_order", "--posts_per_page=1", "--fields=ID", "--format=json"]).then(function (result) {
+			LocalMain.sendIPCEvent('got-order-id', result);
+		})
+	} )
+
 	ipcMain.on("get-premium-plugin-selections", async () => {
 		if (validToken && !premiumPluginSelections.length) {
 			const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });

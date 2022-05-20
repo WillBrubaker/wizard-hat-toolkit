@@ -9,28 +9,31 @@ import {
 	Text,
 	Spinner,
 	Card,
-	Divider,
+	Checkbox,
 	List,
 	TextButton,
 	Banner,
 	AdvancedToggle,
-	Checkbox,
 	RadioBlock,
 	Container,
 } from "@getflywheel/local-components";
 import { element } from "prop-types";
+import { defaultProps } from "react-select/dist/declarations/src/Select";
 var parse = require('html-react-parser');
 
 export default class Troubleshooting extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			siteId: null,
+			siteId: props.match.params.siteID,
 			showSpinner: false,
 			errorFlyoverOpen: false,
 			textNode: 1,
 			checkboxChecked: false,
+			testEmailSent: false,
+			orderId: 0,
 		};
+	
 	}
 
 	componentDidMount() {
@@ -39,6 +42,11 @@ export default class Troubleshooting extends Component {
 				showSpinner: false,
 			});
 		});
+
+		ipcRenderer.on("got-order-id", (event, data) => {
+			//this.setState({orderId: data})
+			console.log(data)
+		})
 	}
 
 	renderSpinner() {
@@ -55,7 +63,9 @@ export default class Troubleshooting extends Component {
 
 	selectOption(option) {
 		const nextTextNodeId = option.nextText
-		if (nextTextNodeId <= 0) {
+		if (nextTextNodeId === 0 ) {
+			return;
+		} else if (nextTextNodeId < 0) {
 		  this.setState({textNode: 1});
 		  return this.startGame()
 		}
@@ -69,11 +79,13 @@ export default class Troubleshooting extends Component {
 		
 
 		if ('undefined' != typeof option.action) {
-		  //console.info('here is where I would do action ' + option.action)
+		  let keys = new Array;
+		  keys = Object.keys(option.action);
+		  this[keys[0]](option.action[keys[0]])
 		}
 		
 		return this.showTextNode(this.state.textNode)
-	  }
+	}
 
 	shuffle(array) {
 		for (let i = array.length - 1; i > 0; i--) {
@@ -87,15 +99,26 @@ export default class Troubleshooting extends Component {
 		const textNode = prompts.find(
 			(textNode) => textNode.id === textNodeIndex
 		);
-		let elements = new Array;		
+		if ( "undefined" === typeof textNode) {
+			return;
+		}
+		const elements = new Array;
+		const replacements = { '{MailhogPort}': this.props.sites[this.props.selectedSites[0]].services.mailhog.ports.WEB, '{domain}': this.props.sites[this.props.selectedSites[0]].domain }	
+		const replacementKeys = Object.keys(replacements)
 		textNode.text.forEach((paragraph) => {
+			replacementKeys.forEach((key) => {
+				paragraph = paragraph.replace(key, replacements[key])
+			})
 			elements.push(<p><Text fontSize="l">{parse(paragraph)}</Text></p>)
 		});
-
+		
+		let boxes = new Array;
+		let states = new Array;
 		if (textNode.checkboxen) {
-			textNode.checkboxen.forEach((checkbox) => {
-				console.info(gameState)
-				elements.push(<Container style={{ width: "100%", float: "left", fontSize: "17px"}}><Checkbox label={checkbox.label} onChange={(event) => {gameState = Object.assign(gameState, {[checkbox.setState]: event}); this.setState({textNode: checkbox.nextText})} }/></Container>)
+			boxes = textNode.checkboxen
+			boxes.forEach((checkbox) => {
+				gameState = Object.assign(gameState, checkbox.setState)
+				//elements.push(<Container style={{ width: "100%", float: "left", fontSize: "17px"}}><Checkbox label={checkbox.label} checked={false} onChange={(value) => { this.setState({textNode: checkbox.nextText});  if (value) { gameState = Object.assign(gameState, checkbox.setState); this.selectOption(checkbox)} }}  /></Container>)
 			})
 		}
 
@@ -106,6 +129,21 @@ export default class Troubleshooting extends Component {
 			}
 		});
 		return elements;
+	}
+
+	installPlugins(plugins) {
+		this.setState({
+			showSpinner: true,
+		});
+		ipcRenderer.send(
+			"install-plugins",
+			plugins,
+			this.state.siteId
+		);
+	}
+
+	getOrderId() {
+		ipcRenderer.send("get-order-id", this.state.siteId)
 	}
 
 	render() {

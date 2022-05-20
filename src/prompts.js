@@ -7,6 +7,7 @@ export const prompts = [
                 text: 'determine if WordPress emails are working',
                 nextText: 2,
                 setState: { orderStatusForNotWorking: null, conflictForNotWorking: null, hostForNotWorking: null, spellForNotWorking: null },
+                action: {'installPlugins': ['wp-test-email']},
             },
             {
                 text: 'check the order status',
@@ -41,7 +42,6 @@ export const prompts = [
             {
                 text: 'WP Test Email',
                 nextText: 13,
-                action: 'plugin install wp-test-email',
                 setState: { queryMonitorForEmailTest: null, mailLoggingForEmailTest: null, akismetEmailTest: null }
             },
             {
@@ -56,7 +56,6 @@ export const prompts = [
                 nextText: 2,
                 requiredState: (currentState) => !currentState.mailLoggingForEmailTest,
                 setState: { ailLoggingEnabled: true, mailLoggingForEmailTest: true },
-                action: 'wp plugin install wp mail logging'
             },
             {
                 text: 'Akismet',
@@ -88,7 +87,7 @@ export const prompts = [
     },
     {//4 test email was received
         id: 4,
-        text: ['WordPress emails are being sent and received as expected.'],
+        text: ['You have determined that WordPress emails are not affected by any evil spells.', 'What do you do?'],
         options: [
             {
                 text: 'Move to WooCommerce email troubleshooting',
@@ -144,7 +143,7 @@ export const prompts = [
                 text: 'WP Mail Logging',
                 nextText: (currentState) => null === currentState.chosePlaceTestOrder/*still in the wp flow*/ ? 9 : currentState.chosePlaceTestOrder ? 33 : 31,
                 setState: { mailLoggingEnabled: true },
-                action: 'wp plugin install wp mail logging'
+                action: {'installPlugins': ['wp-mail-logging']},
             },
             {
                 text: 'Query monitor',
@@ -238,7 +237,7 @@ export const prompts = [
         options: [
             {
                 text: 'Exit',
-                nextText: 10,
+                nextText: 0,
             }
         ]
     },
@@ -254,12 +253,12 @@ export const prompts = [
     },
     {//13 wp test email has been installed. Prompt to send a test email
         id: 13,
-        text: ['A wizard has magically installed WP Test Email for you. Next, send a test email.', 'Was the test email received?'],
+        text: ['A wizard has magically installed WP Test Email for you. Next, <a href="http://{domain}/wp-admin/tools.php?page=wp-test-email">send a test email</a>.', 'Your test site uses <a href="https://github.com/mailhog/MailHog">Mailhog</a> so the email address you send that to is inconsequential.', 'Check your <a href="http://localhost:{MailhogPort}">inbox (Mailhog)</a>. Was the test email received?'],
         checkboxen: [
             {
                 label: 'The test email has been sent.',
                 nextText: 13,
-                setState: 'testEmailSent',
+                setState: {testEmailSent: true},
             },
         ],
         options: [
@@ -268,6 +267,7 @@ export const prompts = [
                 nextText: 20,
                 setState: { wpEmailReceived: true, testEmailSent: null },
                 requiredState: (currentState) => currentState.testEmailSent,
+                action: {'getOrderId': []}
             },
             {
                 text: 'No',
@@ -304,7 +304,7 @@ export const prompts = [
             {
                 text: 'Install & activate the wp mail log plugin',
                 nextText: 16,
-                action: 'wp install wp mail log, get list of active plugins',
+                action: {'installPlugins': ['wp-mail-logging']},
                 setState: { mailLoggingEnabled: true },
             },
             {
@@ -323,12 +323,12 @@ export const prompts = [
     },
     {//16 wp mail logging installed. Send a new test email. Was it logged?
         id: 16,
-        text: ['A wizard has magically installed WP Mail Logging for you. Next, send a new test email and after, check the mail log to see if it was sent.', 'Was the email logged?'],
+        text: ['A wizard has magically installed WP Mail Logging for you. Next, send a new test email. After, check the <a href="http://{domain}/wp-admin/tools.php?page=wpml_plugin_log">WP Mail Logging Log</a> to see if the email was logged.', 'Was the email logged?'],
         checkboxen: [
             {
                 label: 'The test email has been sent.',
                 nextText: 16,
-                setState: 'testEmailSent',
+                setState: {testEmailSent: true},
             },
         ],
         options: [
@@ -376,17 +376,17 @@ export const prompts = [
     },
     {//18 conflict tshooting was chosen for lack of logged email
         id: 18,
-        text: ['Disable ALL plugins and activate a default theme such as Twenty Twenty-Two then send a test email.', 'Was the test email logged this time?'],
+        text: ['Disable ALL plugins and activate a default theme such as Twenty Twenty-Two then send a test email. After, check the <a href="http://{domain}/wp-admin/tools.php?page=wpml_plugin_log">WP Mail Logging Log</a> to see if the email was logged.', 'Was the test email logged this time?'],
         checkboxen: [
             {
                 label: 'The site is in conflict troubleshooting conditions',
                 nextText: 18,
-                setState: 'conflictConditions'
+                setState: {conflictConditions: true}
             },
             {
                 label: 'The test email has been sent.',
                 nextText: 18,
-                setState: 'testEmailSent',
+                setState: {testEmailSent: true},
             },
             
         ],
@@ -395,19 +395,21 @@ export const prompts = [
                 text: 'Yes',
                 nextText: (currentState) => 0 === currentState.notLoggedCount ? 20 : 30,
                 setState: { wpEmailTroubleshootingDone: true, testEmailSent: null, conflictConditions: null },
-                requiredState: (currentState) => currentState.testEmailSent && conflictConditions,
+                requiredState: (currentState) => currentState.testEmailSent && currentState.conflictConditions,
+                action: {'installPlugins': ['woocommerce']},
             },
             {
                 text: 'No',
                 nextText: 3,
-                requiredState: (currentState) => currentState.testEmailSent && conflictConditions,
+                requiredState: (currentState) => currentState.testEmailSent && currentState.conflictConditions,
                 setState: { testEmailSent: null, conflictConditions: null },
+                action: {'installPlugins': ['woocommerce']},
             }
         ]
     },
     {//19 chose to check fatal error log when email not logged
         id: 19,
-        text: ['Your magic is strong! The dragon is pleased. The fatal error log is a good place to look for clues about why things aren\'t working as expected. The dragon reckons further information about fatal errors is for another time. For the purpose of this excercise, let\'s assume the fatal error presents evidence that there is a plugin conflict behind this.', 'What should you do?'],
+        text: ['Your magic is strong! The dragon is pleased. The fatal error log is a good place to look for clues about why things aren\'t working as expected. The dragon reckons further information about fatal errors is for another time. For this exercise, let\'s assume the fatal error presents evidence that there is a plugin conflict behind this.', 'What should you do?'],
         options: [
             {
                 text: 'Conflict troubleshooting',
@@ -452,25 +454,32 @@ export const prompts = [
     },
     {//21 chose place test order
         id: 21,
-        text: ['Place a test order. After, see if the email was received.', 'Was the email received?'],
+        text: ['Place a test order. After, Check your <a href="http://localhost:{MailhogPort}">inbox (Mailhog)</a> to see if the email was received.', 'Was the test email received?'],
+        checkboxen: [
+            {
+                label: 'Test order placed',
+                nextText: 21,
+                setState: {testOrderEmailPlaced: true},
+            },
+        ],
         options: [
             {
                 text: 'Yes',
                 nextText: (currentState) => currentState.lastNode === 29 ? 44 : 9,
-                setState: { chosePlaceTestOrder: true, testOrderEmailReceived: true, blah: null },
-                requiredState: (currentState) => currentState.blah,
+                setState: { chosePlaceTestOrder: true, testOrderEmailReceived: true, testOrderEmailPlaced: null },
+                requiredState: (currentState) => currentState.testOrderEmailPlaced,
             },
             {
                 text: 'No',
                 nextText: (currentState) => currentState.lastNode === 29 ? 42 : currentState.lastNode === 6 ? 25 : (currentState.lastNode === 20) || (currentState.lastNode === 28 && currentState.wpEmailReceived) ? 7 : (currentState.lastNode === 28 && currentState.wpEmailLogged) ? 22 : currentState.lastNode === 28 ? 25 : 22,
-                setState: { chosePlaceTestOrder: true, testOrderEmailReceived: false, blah: null },
-                requiredState: (currentState) => currentState.blah,
+                setState: { chosePlaceTestOrder: true, testOrderEmailReceived: false, testOrderEmailPlaced: null },
+                requiredState: (currentState) => currentState.testOrderEmailPlaced,
             }
         ]
     },
     {//22 wc; email not received
         id: 22,
-        text: ['Was the email logged?'],
+        text: ['Check the <a href="http://{domain}/wp-admin/tools.php?page=wpml_plugin_log">WP Mail Logging Log</a> to see if the email was logged.', 'Was the email logged?'],
         options: [
             {
                 text: 'Yes',
@@ -486,17 +495,17 @@ export const prompts = [
     },
     {//23 order email not logged on the test order side
         id: 23,
-        text: ['Disable all plugins except for WooCommerce and activate a default theme such as Twenty Twenty-Two or Storefront then place another test order.', 'Was the test email logged this time?'],
+        text: ['Disable all plugins except for WooCommerce and activate a default theme such as Twenty Twenty-Two or Storefront then place another test order. After, check the <a href="http://{domain}/wp-admin/tools.php?page=wpml_plugin_log">WP Mail Logging Log</a> to see if the email was logged.', 'Was the test email logged this time?'],
         checkboxen: [
             {
                 label: 'The site is in conflict troubleshooting conditions',
                 nextText: 23,
-                setState: 'conflictConditions'
+                setState: {conflictConditions: true}
             },
             {
                 label: 'The test email has been sent.',
                 nextText: 23,
-                setState: 'testEmailSent',
+                setState: {testEmailSent: true},
             },
             
         ],
@@ -573,12 +582,12 @@ export const prompts = [
     },
     {//26 test order placed but status not set to paid
         id: 26,
-        text: ['It seems there may be a payment gateway problem. Troubleshooting this is a separate adventure. For now, transition the order to either Processing or Completed and after, check if the email was received.', 'Was the email received?'],
+        text: ['It seems there may be a payment gateway problem. Troubleshooting this is a separate adventure. For now, transition the order to either Processing or Completed, and after, check your <a href="http://localhost:{MailhogPort}">inbox (Mailhog)</a> to see if the email was received.', 'Was the test email received??'],
         checkboxen: [
             {
                 label: 'The order has been transitioned.',
                 nextText: 26,
-                setState: 'unpaidOrderTransitioned',
+                setState: {unpaidOrderTransitioned: true},
             },
         ],
         options: [
@@ -608,12 +617,12 @@ export const prompts = [
     },
     {//28 chose order actions menu
         id: 28,
-        text: ['Use the order actions menu to send the admin new order email then check if it was received.', 'Was the email received?'],
+        text: ['Use the order actions menu to send the admin new order email then check your <a href="http://localhost:{MailhogPort}">inbox (Mailhog)</a> if it was received.', 'Was the test email received?'],
         checkboxen: [
             {
                 label: 'Admin new order email has been sent via order action menu.',
                 nextText: 28,
-                setState: 'testOrderActionEmail',
+                setState: {testOrderActionEmail: true},
             },
         ],
         options: [
@@ -633,17 +642,17 @@ export const prompts = [
     },
     {//29 order email not logged - on the order actions flow.
         id: 29,
-        text: ['Disable all plugins except for WooCommerce and activate a default theme such as Twenty Twenty-Two or Storefront then use the order actions menu to send the admin new order email.', 'Was the test email logged this time?'],
+        text: ['Disable all plugins except for WooCommerce and activate a default theme such as Twenty Twenty-Two or Storefront then use the order actions menu to send the admin new order email. After, check the <a href="http://{domain}/wp-admin/tools.php?page=wpml_plugin_log">WP Mail Logging Log</a> to see if the email was logged.', 'Was the test email logged this time?'],
         checkboxen: [
             {
                 label: 'The site is in conflict troubleshooting conditions',
                 nextText: 29,
-                setState: 'conflictConditions'
+                setState: {conflictConditions: true}
             },
             {
                 label: 'Admin new order email has been sent via order action menu.',
                 nextText: 29,
-                setState: 'testEmailSent',
+                setState: {testEmailSent: true},
             },
             
         ],
@@ -680,12 +689,12 @@ export const prompts = [
     },
     {//31 chose order actions menu in the not received path
         id: 31,
-        text: ['Use the order actions menu to send the admin new order email then check if it was logged.', 'Was the email logged?'],
+        text: ['Use the order actions menu to send the admin new order email. After, check the <a href="http://{domain}/wp-admin/tools.php?page=wpml_plugin_log">WP Mail Logging Log</a> to see if the email was logged.', 'Was the email logged?'],
         checkboxen: [
             {
                 label: 'Admin new order email has been sent via order action menu.',
                 nextText: 31,
-                setState: 'testOrderActionEmail',
+                setState: {testOrderActionEmail: true},
             },
         ],
         options: [
@@ -705,12 +714,12 @@ export const prompts = [
     },
     {//32 chose order actions menu - in the not received flow
         id: 32,
-        text: ['Use the order actions menu to send the admin new order email then check if it was logged.', 'Was the email logged?'],
+        text: ['Use the order actions menu to send the admin new order email. After, check the <a href="http://{domain}/wp-admin/tools.php?page=wpml_plugin_log">WP Mail Logging Log</a> to see if the email was logged.', 'Was the email logged?'],
         checkboxen: [
             {
                 label: 'Admin new order email has been sent via order action menu.',
                 nextText: 32,
-                setState: 'testOrderActionEmail',
+                setState: {testOrderActionEmail: true},
             },
         ],
         options: [
@@ -731,12 +740,12 @@ export const prompts = [
     },
     {//33 chose place test order - in not received flow.
         id: 33,
-        text: ['Place a test order. After, see if the email was logged.', 'Was the email logged?'],
+        text: ['Place a test order. After, check the <a href="http://{domain}/wp-admin/tools.php?page=wpml_plugin_log">WP Mail Logging Log</a> to see if the email was logged.', 'Was the email logged?'],
         checkboxen: [
             {
                 label: 'Test order placed',
                 nextText: 33,
-                setState: 'testOrderEmailPlaced',
+                setState: {testOrderEmailPlaced: true},
             },
         ],
         options: [
@@ -757,12 +766,12 @@ export const prompts = [
     },
     {//34 test order placed but status not set to paid - in not received flow.
         id: 34,
-        text: ['It seems there may be a payment gateway problem. Troubleshooting this is a separate adventure. For now, transition the order to either Processing or Completed, and after, check if the email was logged.', 'Was the email logged?'],
+        text: ['It seems there may be a payment gateway problem. Troubleshooting this is a separate adventure. For now, transition the order to either Processing or Completed. After, check the <a href="http://{domain}/wp-admin/tools.php?page=wpml_plugin_log">WP Mail Logging Log</a> to see if the email was logged.', 'Was the email logged?'],
         checkboxen: [
             {
                 label: 'The order has been transitioned.',
                 nextText: 34,
-                setState: 'unpaidOrderTransitioned',
+                setState: {unpaidOrderTransitioned: true},
             },
         ],
         options: [
@@ -959,7 +968,7 @@ export const prompts = [
     },
     {//46 mostly a duplicate of 22 but for a different flow
         id: 46,
-        text: ['Was the email logged?'],
+        text: ['Check the <a href="http://{domain}/wp-admin/tools.php?page=wpml_plugin_log">WP Mail Logging Log</a> to see if the email was logged.', 'Was the email logged?'],
         options: [
             {
                 text: 'Yes',

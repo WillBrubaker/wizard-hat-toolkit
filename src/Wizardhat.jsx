@@ -51,6 +51,7 @@ export default class Wizardhat extends React.Component {
 		this.installPlugins = this.installPlugins.bind(this);
 		this.installBundleAddonPlugins =
 			this.installBundleAddonPlugins.bind(this);
+		this.troubleshootingContent = this.troubleshootingContent.bind(this)
 	}
 
 	componentDidMount() {
@@ -64,8 +65,6 @@ export default class Wizardhat extends React.Component {
 		});
 
 		ipcRenderer.on("error", (event) => {
-			console.info(event)
-			console.info(this.state)
 			this.setState({
 				showError: true,
 			});
@@ -264,7 +263,6 @@ export default class Wizardhat extends React.Component {
 	}
 
 	installBundleAddonPlugins() {
-		console.info("isntalling bundle plugins I guess");
 		this.setState({
 			showSpinner: true,
 		});
@@ -336,7 +334,6 @@ export default class Wizardhat extends React.Component {
 	}
 
 	stepIsActive(scenario) {
-		console.info(scenario);
 		return false;
 	}
 
@@ -975,90 +972,6 @@ export default class Wizardhat extends React.Component {
 		</ul>
 	);
 
-	Excercises = () => (
-		<div
-			style={{
-				flexGrow: "1",
-				overflow: "auto",
-				position: "relative",
-			}}
-			class="woo"
-		>
-			<Card
-				style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}
-			></Card>
-			<Divider />
-			<Card style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}>
-				<ul style={{ listStyle: "none" }} class="wizard-hat">
-					<li>
-						<Button
-							onClick={this.testRequest}
-							className="woo button"
-						>
-							Test d/l install plugin
-						</Button>
-					</li>
-				</ul>
-			</Card>
-			<Divider />
-
-			<Card style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}>
-				<p>
-					<h2>Email Troubleshooting</h2>
-				</p>
-				<p>
-					A WooCommerce user has submitted a ticket letting us know
-					that the WooCommerce order emails are not being sent as
-					expected.
-				</p>
-				<AdvancedToggle
-					headingText="Step 1"
-				>
-					<h3>Are WordPress emails working?</h3>
-					<p>
-						Is this a case of not sending emails or not receiving
-						emails? At the same time, is WordPress sending emails?
-						We can check this by using the{" "}
-						<a href="https://wordpress.org/plugins/wp-test-email/">
-							test email plugin
-						</a>{" "}
-						in conjunction with an{" "}
-						<a href="https://wordpress.org/plugins/wp-mail-logging/">
-							email logging plugin
-						</a>
-						. You can press the button below to install both of
-						those plugins.
-					</p>
-					<p>
-						<Button
-							onClick={() => {console.info("button clickt")}}
-							className="woo button"
-						>
-							{this.renderSpinner()}
-							Install Plugins
-						</Button>
-					</p>
-				</AdvancedToggle>
-
-				<Stepper>
-					<Step
-						number={1}
-						done={false}
-						active={this.stepIsActive("email")}
-					/>
-					<Step number={2} done={false} active={false} />
-					<Step number={3} done={false}>
-						Setup WordPress
-					</Step>
-				</Stepper>
-			</Card>
-			<Divider />
-			<Card>
-				Install & Activate Popular Extensions
-				<Button className="woo button">Install</Button>
-		</Card>
-		</div>
-	);
 
 	tokenInput = () => (
 		<div
@@ -1138,7 +1051,7 @@ export default class Wizardhat extends React.Component {
 	);
 
 	troubleshootingContent() {
-		return new Troubleshooting();		
+		return new Troubleshooting(this.props);		
 	}
 
 	render() {
@@ -1191,12 +1104,12 @@ export default class Wizardhat extends React.Component {
 								Plugin Management
 							</TertiaryNavItem>
 							
-							<TertiaryNavItem
+							{/**<TertiaryNavItem
 								path="/tools"
 								component={this.Tools}
 							>
-								Tools
-							</TertiaryNavItem>
+							Tools
+							</TertiaryNavItem>*/}
 							<Divider />
 							<TertiaryNavItem path="/title">
 								<Title>Troubleshooting</Title>
