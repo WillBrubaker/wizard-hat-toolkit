@@ -21,7 +21,7 @@ import {
 	Stepper,
 	Step,
 } from "@getflywheel/local-components";
-import { Select } from "react-select";
+import Select from "react-select";
 export default class Wizardhat extends React.Component {
 	constructor(props) {
 		super(props);
@@ -1031,10 +1031,10 @@ export default class Wizardhat extends React.Component {
 				<p></p>
 			</Card>
 			<Divider />
-			<Card>
+			{/**<Card>
 				Install & Activate Popular Extensions
 				<Button className="woo button">Install</Button>
-			</Card>
+					</Card>*/}
 		</div>
 	);
 
