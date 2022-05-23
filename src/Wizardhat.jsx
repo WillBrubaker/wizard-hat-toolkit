@@ -21,7 +21,7 @@ import {
 	Stepper,
 	Step,
 } from "@getflywheel/local-components";
-import {Select} from "react-select";
+import { Select } from "react-select";
 export default class Wizardhat extends React.Component {
 	constructor(props) {
 		super(props);
@@ -51,7 +51,7 @@ export default class Wizardhat extends React.Component {
 		this.installPlugins = this.installPlugins.bind(this);
 		this.installBundleAddonPlugins =
 			this.installBundleAddonPlugins.bind(this);
-		this.troubleshootingContent = this.troubleshootingContent.bind(this)
+		this.troubleshootingContent = this.troubleshootingContent.bind(this);
 	}
 
 	componentDidMount() {
@@ -107,11 +107,14 @@ export default class Wizardhat extends React.Component {
 				showSpinner: false,
 			});
 		});
-		
-		ipcRenderer.on("install-troubleshooting-plugins", (event, pluginsToInstall) => {
-			console.log(`got plugins to install of ${pluginsToInstall}`)
-			this.installAndActivatePlugins(pluginsToInstall);
-		});
+
+		ipcRenderer.on(
+			"install-troubleshooting-plugins",
+			(event, pluginsToInstall) => {
+				console.log(`got plugins to install of ${pluginsToInstall}`);
+				this.installAndActivatePlugins(pluginsToInstall);
+			}
+		);
 
 		ipcRenderer.send("validate-token");
 	}
@@ -322,28 +325,6 @@ export default class Wizardhat extends React.Component {
 			pluginsToInstall,
 			this.state.siteId
 		);
-	}
-
-	troubleshootingStep(scenario, step) {
-		console.log(scenario);
-		console.log(step);
-	}
-	activateTroubleshootingStep(scenario, step) {
-		console.log(scenario);
-		console.log(step);
-	}
-
-	stepIsActive(scenario) {
-		return false;
-	}
-
-	setUpScenario(scenario) {
-		switch (scenario) {
-			case "email":
-				return scenario;
-			default:
-				return null;
-		}
 	}
 
 	installWoocommerce() {
@@ -729,27 +710,31 @@ export default class Wizardhat extends React.Component {
 										/>
 
 										<p>
-											<Button
-												onClick={this.installAndActivatePlugins.bind(
-													this,
-													[
-														"woocommerce-chained-products",
-														"woocommerce-product-bundles",
-														"woocommerce-force-sells",
-														"woocommerce-composite-products",
-														"woocommerce-mix-and-match-products",
-														"woocommerce-product-addons",
-														"woocommerce-checkout-add-ons",
-														"woocommerce-gravityforms-product-addons",
-														"woocommerce-ninjaforms-product-addons",
-														"ninja-forms",
-													]
-												)}
-												className="woo button"
-											>
-												Install Plugins
-												{this.renderSpinner()}
-											</Button>
+											{this.state.tokenIsValid ? (
+												<Button
+													onClick={this.installAndActivatePlugins.bind(
+														this,
+														[
+															"woocommerce-chained-products",
+															"woocommerce-product-bundles",
+															"woocommerce-force-sells",
+															"woocommerce-composite-products",
+															"woocommerce-mix-and-match-products",
+															"woocommerce-product-addons",
+															"woocommerce-checkout-add-ons",
+															"woocommerce-gravityforms-product-addons",
+															"woocommerce-ninjaforms-product-addons",
+															"ninja-forms",
+														]
+													)}
+													className="woo button"
+												>
+													Install Plugins
+													{this.renderSpinner()}
+												</Button>
+											) : (
+												this.tokenInput
+											)}
 										</p>
 									</div>
 								}
@@ -842,29 +827,33 @@ export default class Wizardhat extends React.Component {
 										/>
 
 										<p>
-											<Button
-												onClick={this.installAndActivatePlugins.bind(
-													this,
-													[
-														"storefront-homepage-contact-section",
-														"storefront-hamburger-menu",
-														"storefront-product-sharing",
-														"storefront-footer-bar",
-														"storefront-powerpack",
-														"storefront-mega-menus",
-														"storefront-reviews",
-														"storefront-pricing-tables",
-														"storefront-product-hero",
-														"storefront-blog-customiser",
-														"storefront-parallax-hero",
-														"woocommerce-product-csv-import-suite",
-													]
-												)}
-												className="woo button"
-											>
-												Install Plugins
-												{this.renderSpinner()}
-											</Button>
+											{this.state.tokenIsValid ? (
+												<Button
+													onClick={this.installAndActivatePlugins.bind(
+														this,
+														[
+															"storefront-homepage-contact-section",
+															"storefront-hamburger-menu",
+															"storefront-product-sharing",
+															"storefront-footer-bar",
+															"storefront-powerpack",
+															"storefront-mega-menus",
+															"storefront-reviews",
+															"storefront-pricing-tables",
+															"storefront-product-hero",
+															"storefront-blog-customiser",
+															"storefront-parallax-hero",
+															"woocommerce-product-csv-import-suite",
+														]
+													)}
+													className="woo button"
+												>
+													Install Plugins
+													{this.renderSpinner()}
+												</Button>
+											) : (
+												this.tokenInput
+											)}
 										</p>
 									</div>
 								}
@@ -972,7 +961,6 @@ export default class Wizardhat extends React.Component {
 		</ul>
 	);
 
-
 	tokenInput = () => (
 		<div
 			style={{
@@ -1046,12 +1034,12 @@ export default class Wizardhat extends React.Component {
 			<Card>
 				Install & Activate Popular Extensions
 				<Button className="woo button">Install</Button>
-					</Card>
+			</Card>
 		</div>
 	);
 
 	troubleshootingContent() {
-		return new Troubleshooting(this.props);		
+		return new Troubleshooting(this.props);
 	}
 
 	render() {
@@ -1085,11 +1073,7 @@ export default class Wizardhat extends React.Component {
 							</TertiaryNavItem>
 							<TertiaryNavItem
 								path="/shop-config"
-								component={
-									this.state.tokenIsValid
-										? this.storeConfig
-										: this.tokenInput
-								}
+								component={this.storeConfig}
 							>
 								Shop Config Options
 							</TertiaryNavItem>
@@ -1103,7 +1087,7 @@ export default class Wizardhat extends React.Component {
 							>
 								Plugin Management
 							</TertiaryNavItem>
-							
+
 							{/**<TertiaryNavItem
 								path="/tools"
 								component={this.Tools}
@@ -1116,11 +1100,10 @@ export default class Wizardhat extends React.Component {
 							</TertiaryNavItem>
 							<TertiaryNavItem
 								path="/excercises"
-								component={ this.troubleshootingContent }
+								component={this.troubleshootingContent}
 							>
 								Email
 							</TertiaryNavItem>
-							
 						</TertiaryNav>
 					</div>
 				</div>

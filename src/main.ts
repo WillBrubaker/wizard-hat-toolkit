@@ -23,6 +23,7 @@ export default function (context) {
 		installPlugins(pluginsToInstall, site);
 	});
 
+	
 	ipcMain.on("get-order-id", async (event, siteId) => {
 		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId); 
 		await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["post", "list", "--post_type=shop_order", "--posts_per_page=1", "--fields=ID", "--format=json"]).then(function (result) {
