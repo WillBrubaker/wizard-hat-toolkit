@@ -965,12 +965,10 @@ export default class Wizardhat extends React.Component {
 		<div
 			style={{
 				flexGrow: "1",
-				overflow: "auto",
 				position: "relative",
 			}}
 			class="woo gh-token"
 		>
-			<Card>
 				<p>
 					This content requires a valid{" "}
 					<a href="https://github.com/settings/tokens">

@@ -38,9 +38,13 @@ div#wootertiarynav ul {
 }
 
 
-.PasswordToggleInput:focus {
+html.Theme__Dark .PasswordToggleInput:focus, .PasswordToggleInput:focus {
     outline: none;
     box-shadow: inset 0 0 0 1px #51bb7b;
     border-color: transparent;
 }
 
+html.Theme__Dark .PasswordToggleInput {
+    box-shadow: 0 0 0 1px #5d5e5e;
+    background-color: #262727;
+}
