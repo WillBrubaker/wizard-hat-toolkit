@@ -979,13 +979,13 @@ export default class Wizardhat extends React.Component {
 					with 'repo' scope enabled.
 				</p>
 				<p>Please enter a valid token to continue.</p>
-				<InputPasswordToggle
+				<p><InputPasswordToggle
 					onChange={(event) =>
 						this.maybeSaveToken(event.target.value)
 					}
 					onBlur={(event) => this.maybeSaveToken(event.target.value)}
-				/>
-			</Card>
+					
+				/></p>
 		</div>
 	);
 

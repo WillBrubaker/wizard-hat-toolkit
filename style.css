@@ -17,9 +17,9 @@ div.gh-token input {
 }
 div.gh-token svg {
     width: 40px;
-    height: 40px;
+    height: 45px;
     position: absolute;
-    right: 28%;
+    right: 24%;
 }
 
 div#wootertiarynav ul {
@@ -36,3 +36,11 @@ div#wootertiarynav ul {
     margin: 1em;
     padding: auto;
 }
+
+
+.PasswordToggleInput:focus {
+    outline: none;
+    box-shadow: inset 0 0 0 1px #51bb7b;
+    border-color: transparent;
+}
+
