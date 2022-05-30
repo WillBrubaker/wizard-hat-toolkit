@@ -995,14 +995,13 @@ export default class Wizardhat extends React.Component {
 		<div
 			style={{
 				flexGrow: "1",
-				overflow: "auto",
 				position: "relative",
 			}}
 			class="woo"
 		>
-			<Card style={{ zIndex: 9999, flexGrow: "1", overflow: "visible" }}>
+			<Card style={{ zIndex: 9999, overflow: "visible" }}>
 				A la Carte plugin installation
-				<p style={{ width: "90%", margin: "1em" }}>
+				<div style={{ width: "90%", margin: "1em" }}>
 					<Select
 						options={this.state.premiumPluginSelections}
 						placeholder={"Select plugin to install..."}
@@ -1016,7 +1015,7 @@ export default class Wizardhat extends React.Component {
 						value={this.state.selectedPlugins}
 						isMulti
 					/>
-				</p>
+				</div>
 				<Button
 					className="woo button"
 					//disabled={this.state.installPluginButton}
@@ -1086,12 +1085,12 @@ export default class Wizardhat extends React.Component {
 								Plugin Management
 							</TertiaryNavItem>
 
-							{/**<TertiaryNavItem
+							<TertiaryNavItem
 								path="/tools"
 								component={this.Tools}
 							>
 							Tools
-							</TertiaryNavItem>*/}
+							</TertiaryNavItem>
 							<Divider />
 							<TertiaryNavItem path="/title">
 								<Title>Troubleshooting</Title>

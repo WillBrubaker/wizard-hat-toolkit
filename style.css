@@ -48,3 +48,7 @@ html.Theme__Dark .PasswordToggleInput {
     box-shadow: 0 0 0 1px #5d5e5e;
     background-color: #262727;
 }
+
+html.Theme__Dark .css-1s2u09g-control, html.Theme__Dark  .css-1pahdxg-control, html.Theme__Dark #react-select-2-listbox {
+    background-color: #262727;
+}
