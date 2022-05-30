@@ -38,6 +38,7 @@ export default class Wizardhat extends React.Component {
 			installPluginButton: true,
 			pluginsToInstall: [],
 			selectedPlugins: null,
+			switchingTo: null,
 		};
 
 		this.hideInstructions = this.hideInstructions.bind(this);
@@ -100,6 +101,9 @@ export default class Wizardhat extends React.Component {
 			this.setState({
 				pluginsToInstall: [],
 			});
+			this.setState({
+				switchingTo: null,
+			});
 		});
 
 		ipcRenderer.on("plugin-install-done", () => {
@@ -144,6 +148,9 @@ export default class Wizardhat extends React.Component {
 		this.setState({
 			showSpinner: true,
 		});
+		this.setState({
+			switchingTo: newLocale,
+		})
 		ipcRenderer.send("switch-country", this.state.siteId, optionsToSet);
 		this.localeSwitchedTo = newLocale;
 	}
@@ -882,9 +889,10 @@ export default class Wizardhat extends React.Component {
 						woocommerce_dimension_unit: "in",
 					})}
 					className="woo button"
+					disabled={this.state.showSpinner}
 				>
 					Switch Site to United States
-					{this.renderSpinner()}
+					{"United States" === this.state.switchingTo ? this.renderSpinner() : null}
 				</Button>
 			</li>
 			<li>
@@ -902,9 +910,10 @@ export default class Wizardhat extends React.Component {
 						woocommerce_dimension_unit: "cm",
 					})}
 					className="woo button"
+					disabled={this.state.showSpinner}
 				>
 					Switch Site to Europe
-					{this.renderSpinner()}
+					{"Europe" === this.state.switchingTo ? this.renderSpinner() : null}
 				</Button>
 			</li>
 			<li>
@@ -923,9 +932,10 @@ export default class Wizardhat extends React.Component {
 						woocommerce_dimension_unit: "in",
 					})}
 					className="woo button"
+					disabled={this.state.showSpinner}
 				>
 					Switch Site to Australia
-					{this.renderSpinner()}
+					{"Australia" === this.state.switchingTo ? this.renderSpinner() : null}
 				</Button>
 			</li>
 			<li>
@@ -943,9 +953,10 @@ export default class Wizardhat extends React.Component {
 						woocommerce_dimension_unit: "cm",
 					})}
 					className="woo button"
+					disabled={this.state.showSpinner}
 				>
 					Switch Site to Canada
-					{this.renderSpinner()}
+					{"Canada" === this.state.switchingTo ? this.renderSpinner() : null}
 				</Button>
 			</li>
 		</ul>
