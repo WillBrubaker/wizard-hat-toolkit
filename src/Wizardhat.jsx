@@ -35,6 +35,7 @@ export default class Wizardhat extends React.Component {
 			dayContent: 1,
 			rootPath: props.sites[props.match.params.siteID].path,
 			premiumPluginSelections: [],
+			premiumThemeSelections: [],
 			installPluginButton: true,
 			pluginsToInstall: [],
 			selectedPlugins: null,
@@ -79,11 +80,18 @@ export default class Wizardhat extends React.Component {
 				tokenIsValid: args.valid,
 			});
 			ipcRenderer.send("get-premium-plugin-selections");
+			ipcRenderer.send("get-premium-theme-selections");
 		});
 
 		ipcRenderer.on("premium-plugin-selections", (event, args) => {
 			this.setState({
 				premiumPluginSelections: args,
+			});
+		});
+		
+		ipcRenderer.on("premium-theme-selections", (event, args) => {
+			this.setState({
+				premiumThemeSelections: args,
 			});
 		});
 
@@ -330,6 +338,17 @@ export default class Wizardhat extends React.Component {
 		ipcRenderer.send(
 			"install-plugins",
 			pluginsToInstall,
+			this.state.siteId
+		);
+	}
+	
+	installThemes(themesToInstall) {
+		this.setState({
+			showSpinner: true,
+		});
+		ipcRenderer.send(
+			"install-themes",
+			themesToInstall,
 			this.state.siteId
 		);
 	}
@@ -740,7 +759,7 @@ export default class Wizardhat extends React.Component {
 													{this.renderSpinner()}
 												</Button>
 											) : (
-												this.tokenInput
+												this.tokenInput()
 											)}
 										</p>
 									</div>
@@ -859,7 +878,52 @@ export default class Wizardhat extends React.Component {
 													{this.renderSpinner()}
 												</Button>
 											) : (
-												this.tokenInput
+												this.tokenInput()
+											)}
+										</p>
+										<Divider
+											style={{
+												width: "100%",
+												float: "left",
+												margin: "1em",
+											}}
+										/>
+										<p style={{
+											width: "100%",
+											float: "left",
+										}}>
+											Use the button below to install all
+											of the necessary themes for today's
+											agenda.
+										</p>
+										<Divider
+											style={{
+												width: "100%",
+												float: "left",
+												margin: "1em",
+											}}
+										/>
+
+										<p>
+											{this.state.tokenIsValid ? (
+												<Button
+													onClick={this.installThemes.bind(
+														this,
+														[
+															"deli",
+															"boutique",
+															"outlet",
+															"pharmacy",
+															"homestore",
+														]
+													)}
+													className="woo button"
+												>
+													Install Themes
+													{this.renderSpinner()}
+												</Button>
+											) : (
+												this.tokenInput()
 											)}
 										</p>
 									</div>
@@ -1023,6 +1087,7 @@ export default class Wizardhat extends React.Component {
 							flexGrow: "1",
 							overflow: "visible",
 						}}
+						className="plugin-select"
 						value={this.state.selectedPlugins}
 						isMulti
 					/>
@@ -1067,11 +1132,7 @@ export default class Wizardhat extends React.Component {
 
 							<TertiaryNavItem
 								path="/week2"
-								component={
-									this.state.tokenIsValid
-										? this.weekContent(2)
-										: this.tokenInput
-								}
+								component={this.weekContent(2)}
 							>
 								Week 2
 							</TertiaryNavItem>

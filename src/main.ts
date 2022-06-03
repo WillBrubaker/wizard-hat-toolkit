@@ -13,6 +13,8 @@ export default function (context) {
 	const fs = require('fs');
 	let premiumPluginInfo = {};
 	let premiumPluginSelections = [];
+	let premiumThemeInfo = {};
+	let premiumThemeSelections = [];
 	
 	ipcMain.on('test-request', async () => {
 		download("", "");
@@ -21,6 +23,11 @@ export default function (context) {
 	ipcMain.on("install-plugins", async (event, pluginsToInstall, siteId) => {
 		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
 		installPlugins(pluginsToInstall, site);
+	});
+
+	ipcMain.on("install-themes", async (event, themesToInstall, siteId) => {
+		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
+		installThemes(themesToInstall, site);
 	});
 
 	
@@ -79,6 +86,39 @@ export default function (context) {
 		}
 		LocalMain.sendIPCEvent("premium-plugin-selections", premiumPluginSelections);
 	});
+
+	ipcMain.on("get-premium-theme-selections", async () => {
+		if (validToken && !premiumThemeSelections.length) {
+			const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+			await octokit.request('GET /repos/{owner}/{repo}/commits', {
+				owner: 'woocommerce',
+				repo: 'all-themes',
+			}).then(async ({ data }) => {
+				await octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
+					owner: 'woocommerce',
+					repo: 'all-themes',
+					tree_sha: data[0].commit.tree.sha,
+				}).then(async ({ data }) => {
+					for (var index in data.tree) {
+						if ("tree" === data.tree[index].type) {
+							premiumThemeSelections.push({ label: data.tree[index].path, value: index });
+						}
+					}
+					premiumThemeInfo = data.tree;
+				}, function (err) {
+					LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+					LocalMain.sendIPCEvent('error');
+					LocalMain.sendIPCEvent('spinner-done');
+				});
+			}, function (err) {
+				LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+				LocalMain.sendIPCEvent('error');
+				LocalMain.sendIPCEvent('spinner-done');
+			});
+		}
+		LocalMain.sendIPCEvent("premium-theme-selections", premiumThemeSelections);
+	});
+
 
 	ipcMain.on("install-woocommerce", async (event, siteId, path) => {
 		var error = false;
@@ -147,7 +187,6 @@ export default function (context) {
 
 
 		if (!error) {
-			LocalMain.getServiceContainer().cradle.localLogger.log('info', 'WooCommerce install completed without errors!');
 			LocalMain.sendIPCEvent("spinner-done");
 		}
 
@@ -204,7 +243,6 @@ export default function (context) {
 		}
 
 		if (!error) {
-			LocalMain.getServiceContainer().cradle.localLogger.log('info', 'Switcheroo completed without errors!');
 			LocalMain.sendIPCEvent('instructions');
 		}
 
@@ -234,7 +272,6 @@ export default function (context) {
 			})
 			.catch(function (err) {
 				LocalMain.sendIPCEvent('error');
-				LocalMain.getServiceContainer().cradle.localLogger.log('error', "big ol failure");
 				LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
 				LocalMain.getServiceContainer().cradle.localLogger.log('error', err.message);
 			});
@@ -256,6 +293,39 @@ export default function (context) {
 			for (const zipFile of zipFiles) {
 				await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["plugin", "install", zipFile, "--activate", "--force"]).then(function () {
 					if (!dotOrgPlugins.includes(zipFile)) {
+						fs.unlink(zipFile, (err) => {
+							if (err) {
+								LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+							}
+						});
+					}
+				}, function (err) {
+					LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+					LocalMain.sendIPCEvent('spinner-done');
+				});
+			}
+		}).then(() => {
+			LocalMain.sendIPCEvent('spinner-done');
+		});
+	}	
+	
+	function installThemes(themesToInstall, site) {
+		let dotOrgThemes = [];
+		let premiumThemes = [];
+		themesToInstall.forEach((slug: string) => {
+			const isPremium = obj => obj.label === slug;
+			if (premiumThemeSelections.some(isPremium)) {
+				premiumThemes.push(slug);
+			} else {
+				dotOrgThemes.push(slug);
+			}
+		});
+		
+		downloadThemes(premiumThemes).then(async (zipFiles) => {
+			zipFiles = zipFiles.concat(dotOrgThemes)
+			for (const zipFile of zipFiles) {
+				await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["theme", "install", zipFile ]).then(function () {
+					if (!dotOrgThemes.includes(zipFile)) {
 						fs.unlink(zipFile, (err) => {
 							if (err) {
 								LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
@@ -322,6 +392,9 @@ export default function (context) {
 				context.request.get(fileUrl, {
 					'auth': {
 						'bearer': process.env.GITHUB_TOKEN
+					},
+					'headers': {
+						'User-Agent': 'Wizard Hat Toolkit'
 					}
 				}).on("error", function (err) {
 					LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
@@ -339,8 +412,6 @@ export default function (context) {
 	const sortSlugs = (slug) => {
 		return new Promise((resolve, reject) => {
 			const isPremium = obj => obj.label === slug;
-			LocalMain.getServiceContainer().cradle.localLogger.log('info', `slug: ${slug}`);
-			LocalMain.getServiceContainer().cradle.localLogger.log('info', premiumPluginSelections.some(isPremium));
 			resolve(premiumPluginSelections.some(isPremium))
 		});
 	}
@@ -364,6 +435,22 @@ export default function (context) {
 				reject(err);
 			});
 		});
+	}	
+	
+	const getThemeDownloadUrl = (pluginSlug) => {
+		const path = pluginSlug;
+		const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+		return new Promise((resolve, reject) => {
+			octokit.request('GET /repos/{owner}/{repo}/releases/latest', {
+				owner: 'woocommerce',
+				repo: pluginSlug,
+			}).then(async ({ data }) => {
+				resolve(data.zipball_url);
+			}, function (err) {
+				LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+				reject(err);
+			});
+		});
 	}
 
 	const downloadPlugins = async (pluginsToInstall) => {
@@ -371,6 +458,25 @@ export default function (context) {
 		for (const pluginSlug of pluginsToInstall) {
 			const outputFile = context.environment.userDataPath + `/addons/wizard-hat-toolkit/${pluginSlug}.zip`;
 			await getDownloadUrl(pluginSlug).then(async (fileUrl: string) => {
+				await downloadZipFromGitHub(fileUrl, outputFile).then((result) => {
+					zipFiles.push(result);
+				}, function (err) {
+					LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+				});
+			}, function (err) {
+				LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+			});
+
+		}
+		return zipFiles;
+	};
+
+	const downloadThemes = async (pluginsToInstall) => {
+		
+		let zipFiles = [];
+		for (const pluginSlug of pluginsToInstall) {
+			const outputFile = context.environment.userDataPath + `/addons/wizard-hat-toolkit/${pluginSlug}.zip`;
+			await getThemeDownloadUrl(pluginSlug).then(async (fileUrl: string) => {
 				await downloadZipFromGitHub(fileUrl, outputFile).then((result) => {
 					zipFiles.push(result);
 				}, function (err) {
