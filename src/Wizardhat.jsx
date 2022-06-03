@@ -40,6 +40,8 @@ export default class Wizardhat extends React.Component {
 			pluginsToInstall: [],
 			selectedPlugins: null,
 			switchingTo: null,
+			installingPlugins: false,
+			installingThemes: false,
 		};
 
 		this.hideInstructions = this.hideInstructions.bind(this);
@@ -111,6 +113,12 @@ export default class Wizardhat extends React.Component {
 			});
 			this.setState({
 				switchingTo: null,
+			});
+			this.setState({
+				installingThemes: false,
+			});
+			this.setState({
+				installingPlugins: false,
 			});
 		});
 
@@ -335,6 +343,9 @@ export default class Wizardhat extends React.Component {
 		this.setState({
 			showSpinner: true,
 		});
+		this.setState({
+			installingPlugins: true,
+		});
 		ipcRenderer.send(
 			"install-plugins",
 			pluginsToInstall,
@@ -345,6 +356,9 @@ export default class Wizardhat extends React.Component {
 	installThemes(themesToInstall) {
 		this.setState({
 			showSpinner: true,
+		});
+		this.setState({
+			installingThemes: true,
 		});
 		ipcRenderer.send(
 			"install-themes",
@@ -873,9 +887,10 @@ export default class Wizardhat extends React.Component {
 														]
 													)}
 													className="woo button"
+													disabled={this.state.showSpinner}
 												>
-													Install Plugins
-													{this.renderSpinner()}
+													Install{this.state.installingPlugins ? "ing" : null} Plugins
+													{this.state.installingPlugins ? this.renderSpinner() : null}
 												</Button>
 											) : (
 												this.tokenInput()
@@ -918,9 +933,10 @@ export default class Wizardhat extends React.Component {
 														]
 													)}
 													className="woo button"
+													disabled={this.state.showSpinner}
 												>
-													Install Themes
-													{this.renderSpinner()}
+													Install{this.state.installingThemes ? "ing" : null} Themes
+													{this.state.installingThemes ? this.renderSpinner() : null}
 												</Button>
 											) : (
 												this.tokenInput()
@@ -955,7 +971,7 @@ export default class Wizardhat extends React.Component {
 					className="woo button"
 					disabled={this.state.showSpinner}
 				>
-					Switch Site to United States
+					Switch{"United States" === this.state.switchingTo ? "ing" : null} Site to United States
 					{"United States" === this.state.switchingTo ? this.renderSpinner() : null}
 				</Button>
 			</li>
@@ -976,7 +992,7 @@ export default class Wizardhat extends React.Component {
 					className="woo button"
 					disabled={this.state.showSpinner}
 				>
-					Switch Site to Europe
+					Switch{"Europe" === this.state.switchingTo ? "ing" : null} Site to Europe
 					{"Europe" === this.state.switchingTo ? this.renderSpinner() : null}
 				</Button>
 			</li>
@@ -998,7 +1014,7 @@ export default class Wizardhat extends React.Component {
 					className="woo button"
 					disabled={this.state.showSpinner}
 				>
-					Switch Site to Australia
+					Switch{"Australia" === this.state.switchingTo ? "ing" : null} Site to Australia
 					{"Australia" === this.state.switchingTo ? this.renderSpinner() : null}
 				</Button>
 			</li>
@@ -1019,8 +1035,29 @@ export default class Wizardhat extends React.Component {
 					className="woo button"
 					disabled={this.state.showSpinner}
 				>
-					Switch Site to Canada
+					Switch{"Canada" === this.state.switchingTo ? "ing" : null} Site to Canada
 					{"Canada" === this.state.switchingTo ? this.renderSpinner() : null}
+				</Button>
+			</li>
+			<li>
+				<Button
+					onClick={this.switchCountry.bind(this, "U.K.", {
+						woocommerce_store_address: "828 Church Lane",
+						woocommerce_store_address_2: "",
+						woocommerce_store_city: "London",
+						woocommerce_default_country: "GB",
+						woocommerce_store_postcode: "N86 2VU",
+						woocommerce_currency: "GBP",
+						woocommerce_price_thousand_sep: " ",
+						woocommerce_price_decimal_sep: ",",
+						woocommerce_weight_unit: "kg",
+						woocommerce_dimension_unit: "cm",
+					})}
+					className="woo button"
+					disabled={this.state.showSpinner}
+				>
+					Switch{"U.K." === this.state.switchingTo ? "ing" : null} Site to United Kingdom
+					{"U.K." === this.state.switchingTo ? this.renderSpinner() : null}
 				</Button>
 			</li>
 		</ul>

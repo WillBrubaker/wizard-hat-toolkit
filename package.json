@@ -1,7 +1,7 @@
 {
     "name": "wizard-hat-toolkit",
     "productName": "Wizard Hat Toolkit",
-    "version": "1.1-beta.2",
+    "version": "1.1.1",
     "author": "Hiro",
     "keywords": [
         "local-addon"
@@ -70,9 +70,13 @@
         "local-by-flywheel": "^5.0.0"
     },
     "bundleDependencies": [
+        "@emotion/react",
+        "@emotion/styled",
         "@getflywheel/local-components",
+        "@material-ui/core",
         "@octokit/rest",
         "@terascope/fetch-github-release",
+        "@types/react-select",
         "babel-eslint",
         "classnames",
         "dateformat",

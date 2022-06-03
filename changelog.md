@@ -1,5 +1,17 @@
 ## Changelog
 
+### 1.1.1
+* Dark mode CSS added
+* Shop config button spinners detached from one another
+* Week 2 day 5 can now also install plugins
+* Moved checks for valid GH token to the points where blockage actually happens
+* Add U.K. to switcheroo button array
+* Add gerund to button when active
+
+
+### 1.1
+ * Troubleshooting excercise added
+  
 ### 1.1-beta.2 TBD
 * Week 2 Day 1 content added.
 * Week 2 Day 2 content added.
