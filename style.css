@@ -14,6 +14,7 @@ ul.wizard-hat li {
 div.gh-token input {
     width: 75%;
     height: 50px;
+    padding: .5em;
 }
 div.gh-token svg {
     width: 40px;
@@ -49,6 +50,6 @@ html.Theme__Dark .PasswordToggleInput {
     background-color: #262727;
 }
 
-html.Theme__Dark .css-1s2u09g-control, html.Theme__Dark  .css-1pahdxg-control, html.Theme__Dark #react-select-2-listbox {
+html.Theme__Dark .css-1s2u09g-control, html.Theme__Dark  .plugin-select > div, html.Theme__Dark #react-select-2-listbox {
     background-color: #262727;
 }

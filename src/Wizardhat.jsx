@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { ipcRenderer } from "electron";
 import Troubleshooting from "./troubleshooting-excercise";
+import WeekThree from "./WeekThree";
 const { exec } = require("child_process");
 // https://github.com/getflywheel/local-components
 import {
@@ -56,6 +57,7 @@ export default class Wizardhat extends React.Component {
 		this.installBundleAddonPlugins =
 			this.installBundleAddonPlugins.bind(this);
 		this.troubleshootingContent = this.troubleshootingContent.bind(this);
+		this.weekThreeContent = this.weekThreeContent.bind(this);
 	}
 
 	componentDidMount() {
@@ -380,6 +382,7 @@ export default class Wizardhat extends React.Component {
 
 	dayContent(week) {
 		let todayContent;
+		console.info(week)
 		switch (week) {
 			case 2:
 				switch (this.state.dayContent) {
@@ -949,6 +952,8 @@ export default class Wizardhat extends React.Component {
 					default:
 						return null;
 				}
+			case 3:
+				return (<div>hello week three</div>);
 		}
 	}
 
@@ -1152,6 +1157,10 @@ export default class Wizardhat extends React.Component {
 		return new Troubleshooting(this.props);
 	}
 
+	weekThreeContent() {
+		return new WeekThree(this.props);
+	}
+
 	render() {
 		if (
 			"running" ===
@@ -1172,6 +1181,12 @@ export default class Wizardhat extends React.Component {
 								component={this.weekContent(2)}
 							>
 								Week 2
+							</TertiaryNavItem>
+							<TertiaryNavItem
+								path="/week3"
+								component={this.weekThreeContent}
+							>
+								Week 3
 							</TertiaryNavItem>
 							<Divider />
 							<TertiaryNavItem path="/title">
