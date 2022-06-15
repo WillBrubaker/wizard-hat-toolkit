@@ -1,7 +1,5 @@
 import React, { Component } from "react";
 import { ipcRenderer } from "electron";
-import * as LocalRenderer from "@getflywheel/local/renderer";
-import { prompts, gameState } from "./prompts";
 import {
 	Button,
 	FlyModal,
@@ -14,12 +12,9 @@ import {
     TextButton,
     Divider,
     List,
+    InputPasswordToggle,
 } from "@getflywheel/local-components";
-import { element, objectOf } from "prop-types";
-import { defaultProps } from "react-select/dist/declarations/src/Select";
-var parse = require("html-react-parser");
-let replacements = {};
-let replacementKeys = {};
+
 
 export default class WeekThree extends Component {
 	constructor(props) {
@@ -28,6 +23,8 @@ export default class WeekThree extends Component {
 			siteId: props.match.params.siteID,
 			showSpinner: false,
 			day: 1,
+            tokenIsValid: null,
+            installingPlugins: false,
 		};
 	}
 
@@ -36,12 +33,32 @@ export default class WeekThree extends Component {
 			this.setState({
 				showSpinner: false,
 			});
+
+            this.setState({
+                installingPlugins: false,
+            });
 		});
 
+        ipcRenderer.send('is-token-valid');
+        ipcRenderer.on("gh-token", (event, args) => {
+			this.setState({
+				tokenIsValid: args.valid,
+			});
+		});
+        
+        ipcRenderer.on("token-is-valid", (event, tokenIsValid) => {
+			this.setState({
+				tokenIsValid: tokenIsValid,
+			});
+		});
+
+       
 	}
 
 	componentWillUnmount() {
 		ipcRenderer.removeAllListeners("spinner-done");
+		ipcRenderer.removeAllListeners("gh-token");
+		ipcRenderer.removeAllListeners("token-is-valid");
 	}
 
 	renderSpinner() {
@@ -51,6 +68,65 @@ export default class WeekThree extends Component {
 			return null;
 		}
 	}
+
+    maybeSaveToken(token) {
+		ipcRenderer.send("set-user-token", token);
+	}
+
+    installAndActivatePlugins(pluginsToInstall) {
+		this.setState({
+			showSpinner: true,
+		});
+		this.setState({
+			installingPlugins: true,
+		});
+		ipcRenderer.send(
+			"install-plugins",
+			pluginsToInstall,
+			this.state.siteId
+		);
+	}
+
+    installAndActivateWCPay(pluginsToInstall) {
+        ipcRenderer.send('install-wc-dev-tools', this.state.siteId)
+		this.setState({
+			showSpinner: true,
+		});
+		this.setState({
+			installingPlugins: true,
+		});
+		ipcRenderer.send(
+			"install-plugins",
+			pluginsToInstall,
+			this.state.siteId
+		);
+	}
+
+    tokenInput = () => (
+		<div
+			style={{
+				flexGrow: "1",
+				position: "relative",
+			}}
+			class="woo gh-token"
+		>
+				<p>
+					This content requires a valid{" "}
+					<a href="https://github.com/settings/tokens">
+						GitHub token
+					</a>{" "}
+					with 'repo' scope enabled.
+				</p>
+				<p>Please enter a valid token to continue.</p>
+				<p><InputPasswordToggle
+					onChange={(event) =>
+						this.maybeSaveToken(event.target.value)
+					}
+					onBlur={(event) => this.maybeSaveToken(event.target.value)}
+					
+				/></p>
+		</div>
+	);
 
     dayContent() {
         switch (this.state.day) {
@@ -114,11 +190,15 @@ export default class WeekThree extends Component {
                         content={
                             <div>
                                 <p>
-                                    Today you will be reviewing the
-                                    WooCommerce system status report and
-                                    the system tools included with
-                                    WooCommerce.
+                                    Today you will be working with WooCommerce Payments and some payment related extensions.
                                 </p>
+                                <p>
+                                    Use the button below to install all
+                                    of the necessary plugins for today's
+                                    agenda.
+                                   
+                                </p>
+                                <p>This does install the WC Pay Dev Tools </p>
                                 <Divider
                                     style={{
                                         width: "100%",
@@ -127,72 +207,28 @@ export default class WeekThree extends Component {
                                     }}
                                 />
 
-                                <div
-                                    id="list"
-                                    style={{
-                                        width: "100%",
-                                        float: "left",
-                                    }}
-                                >
-                                    <List
-                                        style={{ width: "100%" }}
-                                        bullets={true}
-                                        headerHasDivider={true}
-                                        headerText={
-                                            <a
-                                                href={`http://${
-                                                    this.props.sites[this.props.selectedSites[0]].domain
-                                                }/wp-admin/admin.php?page=wc-status`}
-                                            >
-                                                Visit WooCommerce System
-                                                Status Report
-                                            </a>
-                                        }
-                                        listItemFontWeight="300"
-                                    >
-                                        <li>
-                                            <a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/">
-                                                Understanding the
-                                                WooCommerce System
-                                                Status Report
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="https://wooniversity.wordpress.com/troubleshooting/the-system-status-report-ssr/">
-                                                The System Status Report
-                                                (SSR)
-                                            </a>
-                                        </li>
-                                    </List>
-                                    <List
-                                        style={{ width: "100%" }}
-                                        bullets={true}
-                                        headerHasDivider={true}
-                                        headerText={
-                                            <a
-                                                href={`http://${
-                                                    this.props.sites[this.props.selectedSites[0]].domain
-                                                }/wp-admin/admin.php?page=wc-status&tab=tools`}
-                                            >
-                                                Visit WooCommerce System
-                                                Tools
-                                            </a>
-                                        }
-                                        listItemFontWeight="300"
-                                    >
-                                        <li>
-                                            <a href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/#section-16">
-                                                System Tools
-                                                Documentation
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="https://wooniversity.wordpress.com/troubleshooting/woocommerce-system-tools/">
-                                                WooCommerce System Tools
-                                            </a>
-                                        </li>
-                                    </List>
-                                </div>
+                                <p>
+                                    {this.state.tokenIsValid ? (
+                                        <Button
+                                            onClick={this.installAndActivateWCPay.bind(
+                                                this,
+                                                [
+                                                    "woocommerce-payments",
+                                                    "woocommerce-deposits",
+                                                    "woocommerce-pre-orders",
+                                                    "woocommerce-gateway-purchase-order",
+                                                    "woocommerce-eu-vat-number",
+                                                ]
+                                            )}
+                                            className="woo button"
+                                        >
+                                            Install{this.state.installingPlugins ? "ing" : null} Plugins
+                                            {this.renderSpinner()}
+                                        </Button>
+                                    ) : (
+                                        this.tokenInput()
+                                    )}
+                                </p>
                             </div>
                         }
                     />
@@ -208,15 +244,10 @@ export default class WeekThree extends Component {
                         content={
                             <div>
                                 <p>
-                                    Today you will be diving into
-                                    extensions on the WooCommerce
-                                    Marketplace with a focus on bundles
-                                    and add-ons.
+                                    Today you will be working with the Stripe payment gateway.
                                 </p>
                                 <p>
-                                    Use the button below to install all
-                                    of the necessary plugins for today's
-                                    agenda.
+                                    Use the button below to install Stripe.
                                    
                                 </p>
                                 <Divider
@@ -233,21 +264,12 @@ export default class WeekThree extends Component {
                                             onClick={this.installAndActivatePlugins.bind(
                                                 this,
                                                 [
-                                                    "woocommerce-chained-products",
-                                                    "woocommerce-product-bundles",
-                                                    "woocommerce-force-sells",
-                                                    "woocommerce-composite-products",
-                                                    "woocommerce-mix-and-match-products",
-                                                    "woocommerce-product-addons",
-                                                    "woocommerce-checkout-add-ons",
-                                                    "woocommerce-gravityforms-product-addons",
-                                                    "woocommerce-ninjaforms-product-addons",
-                                                    "ninja-forms",
+                                                    "woocommerce-gateway-stripe",
                                                 ]
                                             )}
                                             className="woo button"
                                         >
-                                            Install Plugins
+                                            Install{this.state.installingPlugins ? "ing" : null} Plugins
                                             {this.renderSpinner()}
                                         </Button>
                                     ) : (
@@ -392,30 +414,6 @@ export default class WeekThree extends Component {
                                         margin: "1em",
                                     }}
                                 />
-
-                                <p>
-                                    {this.state.tokenIsValid ? (
-                                        <Button
-                                            onClick={this.installThemes.bind(
-                                                this,
-                                                [
-                                                    "deli",
-                                                    "boutique",
-                                                    "outlet",
-                                                    "pharmacy",
-                                                    "homestore",
-                                                ]
-                                            )}
-                                            className="woo button"
-                                            disabled={this.state.showSpinner}
-                                        >
-                                            Install{this.state.installingThemes ? "ing" : null} Themes
-                                            {this.state.installingThemes ? this.renderSpinner() : null}
-                                        </Button>
-                                    ) : (
-                                        null
-                                    )}
-                                </p>
                             </div>
                         }
                     />

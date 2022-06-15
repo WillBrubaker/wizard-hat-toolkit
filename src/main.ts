@@ -15,10 +15,39 @@ export default function (context) {
 	let premiumPluginSelections = [];
 	let premiumThemeInfo = {};
 	let premiumThemeSelections = [];
-	
+
 	ipcMain.on('test-request', async () => {
 		download("", "");
 	});
+
+	ipcMain.on('save-username', (event, username) => {
+		LocalMain.UserData.set('wpuserName', username);
+		
+	})
+
+	ipcMain.on('save-subdomain', (event, subdomain, siteId) => {
+		const subdomains = LocalMain.UserData.get('subdomains');
+		subdomains[siteId] = subdomain;
+		LocalMain.UserData.set('subdomains', subdomains);
+		LocalMain.sendIPCEvent('debug-message', LocalMain.UserData.get('subdomains'))
+	})
+
+	ipcMain.on('get-jtubeStuff', (event, siteId) => {
+		const subdomains = LocalMain.UserData.get('subdomains');
+		const subdomain = subdomains ? subdomains[siteId] : null;
+		LocalMain.sendIPCEvent("debug-message", subdomains);
+		LocalMain.sendIPCEvent('jtubeStuff', [{ userDataPath: context.environment.userDataPath }, { jtubeInstalled: fs.existsSync(context.environment.userHome + '/jurassictube/jurassictube.sh') }, {wpUsername: LocalMain.UserData.get('wpuserName')}, {subdomain: subdomain}])
+	});
+
+	ipcMain.on('get-context', async () => {
+		LocalMain.getServiceContainer().cradle.localLogger.log('info', LocalMain.SiteData);
+		LocalMain.sendIPCEvent("debug-message", LocalMain.SiteData);
+	});
+
+
+	ipcMain.on('is-token-valid', () => {
+		LocalMain.sendIPCEvent('token-is-valid', validToken);
+	})
 
 	ipcMain.on("install-plugins", async (event, pluginsToInstall, siteId) => {
 		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
@@ -30,13 +59,13 @@ export default function (context) {
 		installThemes(themesToInstall, site);
 	});
 
-	
+
 	ipcMain.on("get-order-id", async (event, siteId) => {
-		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId); 
+		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
 		await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["post", "list", "--post_type=shop_order", "--posts_per_page=1", "--fields=ID", "--format=json"]).then(function (result) {
 			LocalMain.sendIPCEvent('got-order-id', result);
 		})
-	} )
+	})
 
 	ipcMain.on("get-premium-plugin-selections", async () => {
 		if (validToken && !premiumPluginSelections.length) {
@@ -86,6 +115,27 @@ export default function (context) {
 		}
 		LocalMain.sendIPCEvent("premium-plugin-selections", premiumPluginSelections);
 	});
+
+	ipcMain.on("install-wc-dev-tools", async (event, siteId) => {
+		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
+		const outputFile = context.environment.userDataPath + `/addons/wizard-hat-toolkit/woocommerce-payments-dev-tools.zip`;
+		await downloadZipFromGitHub("https://github.com/Automattic/woocommerce-payments-dev-tools/archive/refs/heads/trunk.zip", outputFile).then((result) => {
+		}, function (err) {
+			LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+		}).then(async () => {
+			await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["plugin", "install", outputFile, "--activate", "--force"]).then(function () {
+
+				fs.unlink(outputFile, (err) => {
+					if (err) {
+						LocalMain.getServiceContainer().cradle.localLogger.log("error", err)
+					}
+				});
+			}, function (err) {
+				LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+				LocalMain.sendIPCEvent('spinner-done');
+			});
+		});
+	})
 
 	ipcMain.on("get-premium-theme-selections", async () => {
 		if (validToken && !premiumThemeSelections.length) {
@@ -277,6 +327,19 @@ export default function (context) {
 			});
 	}
 
+	const isJtubeInstalled = () => {
+		const path = context.environment.userHome + '/jurassictube/jurassictube.sh'
+
+		try {
+			if (fs.existsSync(path)) {
+				return true;
+			}
+		} catch (err) {
+			LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+			return false;
+		}
+		return false;
+	}
 	function installPlugins(pluginsToInstall, site) {
 		let dotOrgPlugins = [];
 		let premiumPlugins = [];
@@ -307,8 +370,8 @@ export default function (context) {
 		}).then(() => {
 			LocalMain.sendIPCEvent('spinner-done');
 		});
-	}	
-	
+	}
+
 	function installThemes(themesToInstall, site) {
 		let dotOrgThemes = [];
 		let premiumThemes = [];
@@ -320,11 +383,11 @@ export default function (context) {
 				dotOrgThemes.push(slug);
 			}
 		});
-		
+
 		downloadThemes(premiumThemes).then(async (zipFiles) => {
 			zipFiles = zipFiles.concat(dotOrgThemes)
 			for (const zipFile of zipFiles) {
-				await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["theme", "install", zipFile ]).then(function () {
+				await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["theme", "install", zipFile]).then(function () {
 					if (!dotOrgThemes.includes(zipFile)) {
 						fs.unlink(zipFile, (err) => {
 							if (err) {
@@ -435,8 +498,8 @@ export default function (context) {
 				reject(err);
 			});
 		});
-	}	
-	
+	}
+
 	const getThemeDownloadUrl = (pluginSlug) => {
 		const path = pluginSlug;
 		const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
@@ -472,7 +535,7 @@ export default function (context) {
 	};
 
 	const downloadThemes = async (pluginsToInstall) => {
-		
+
 		let zipFiles = [];
 		for (const pluginSlug of pluginsToInstall) {
 			const outputFile = context.environment.userDataPath + `/addons/wizard-hat-toolkit/${pluginSlug}.zip`;

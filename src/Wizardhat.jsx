@@ -1,7 +1,8 @@
-import React, { Component } from "react";
+import React from "react";
 import { ipcRenderer } from "electron";
 import Troubleshooting from "./troubleshooting-excercise";
 import WeekThree from "./WeekThree";
+import Jurassictube from "./Jurassictube";
 const { exec } = require("child_process");
 // https://github.com/getflywheel/local-components
 import {
@@ -43,7 +44,10 @@ export default class Wizardhat extends React.Component {
 			switchingTo: null,
 			installingPlugins: false,
 			installingThemes: false,
+			port: props.sites[props.match.params.siteID].services.nginx.ports.HTTP[0]
 		};
+		//props.sites[props.match.params.siteID].jtSubDomain = 'wizardhat.jurassic.tube'
+		props.sites[props.match.params.siteID].domain = 'wizardhat.jurassic.tube'
 
 		this.hideInstructions = this.hideInstructions.bind(this);
 		this.hideError = this.hideError.bind(this);
@@ -58,9 +62,12 @@ export default class Wizardhat extends React.Component {
 			this.installBundleAddonPlugins.bind(this);
 		this.troubleshootingContent = this.troubleshootingContent.bind(this);
 		this.weekThreeContent = this.weekThreeContent.bind(this);
+		this.jurassicTube = this.jurassicTube.bind(this);
+		console.info(props)
 	}
 
 	componentDidMount() {
+		ipcRenderer.send("get-context");
 		ipcRenderer.on("instructions", (event) => {
 			this.setState({
 				showInstructions: true,
@@ -85,6 +92,7 @@ export default class Wizardhat extends React.Component {
 			});
 			ipcRenderer.send("get-premium-plugin-selections");
 			ipcRenderer.send("get-premium-theme-selections");
+			ipcRenderer.send('token-is-valid', args.valid);
 		});
 
 		ipcRenderer.on("premium-plugin-selections", (event, args) => {
@@ -133,12 +141,15 @@ export default class Wizardhat extends React.Component {
 		ipcRenderer.on(
 			"install-troubleshooting-plugins",
 			(event, pluginsToInstall) => {
-				console.log(`got plugins to install of ${pluginsToInstall}`);
 				this.installAndActivatePlugins(pluginsToInstall);
 			}
 		);
 
 		ipcRenderer.send("validate-token");
+
+		ipcRenderer.on('is-token-valid', () => {
+			ipcRenderer.send('token-is-valid', this.state.tokenIsValid);
+		})
 	}
 
 	componentWillUnmount() {
@@ -381,8 +392,6 @@ export default class Wizardhat extends React.Component {
 	}
 
 	dayContent(week) {
-		let todayContent;
-		console.info(week)
 		switch (week) {
 			case 2:
 				switch (this.state.dayContent) {
@@ -422,7 +431,7 @@ export default class Wizardhat extends React.Component {
 													this.installWoocommerce
 												}
 											>
-												Install WooCommerce & Demo
+												Install{this.state.showSpinner ? "ing" : null} WooCommerce & Demo
 												Content
 												{this.renderSpinner()}
 											</Button>
@@ -1161,6 +1170,10 @@ export default class Wizardhat extends React.Component {
 		return new WeekThree(this.props);
 	}
 
+	jurassicTube() {
+		return new Jurassictube(this.props)
+	}
+
 	render() {
 		if (
 			"running" ===
@@ -1191,6 +1204,12 @@ export default class Wizardhat extends React.Component {
 							<Divider />
 							<TertiaryNavItem path="/title">
 								<Title>Utilities</Title>
+							</TertiaryNavItem>
+							<TertiaryNavItem
+								path="/jurassic-tube"
+								component={this.jurassicTube}
+							>
+								Jurassic Tube
 							</TertiaryNavItem>
 							<TertiaryNavItem
 								path="/shop-config"
