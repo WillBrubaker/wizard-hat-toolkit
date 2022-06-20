@@ -44,11 +44,7 @@ export default class Wizardhat extends React.Component {
 			switchingTo: null,
 			installingPlugins: false,
 			installingThemes: false,
-			port: props.sites[props.match.params.siteID].services.nginx.ports.HTTP[0]
 		};
-		//props.sites[props.match.params.siteID].jtSubDomain = 'wizardhat.jurassic.tube'
-		props.sites[props.match.params.siteID].domain = 'wizardhat.jurassic.tube'
-
 		this.hideInstructions = this.hideInstructions.bind(this);
 		this.hideError = this.hideError.bind(this);
 		this.showSpinner = this.showSpinner.bind(this);
@@ -63,11 +59,9 @@ export default class Wizardhat extends React.Component {
 		this.troubleshootingContent = this.troubleshootingContent.bind(this);
 		this.weekThreeContent = this.weekThreeContent.bind(this);
 		this.jurassicTube = this.jurassicTube.bind(this);
-		console.info(props)
 	}
 
 	componentDidMount() {
-		ipcRenderer.send("get-context");
 		ipcRenderer.on("instructions", (event) => {
 			this.setState({
 				showInstructions: true,
@@ -1228,12 +1222,12 @@ export default class Wizardhat extends React.Component {
 								Plugin Management
 							</TertiaryNavItem>
 
-							<TertiaryNavItem
+							{/*<TertiaryNavItem
 								path="/tools"
 								component={this.Tools}
 							>
 							Tools
-							</TertiaryNavItem>
+							</TertiaryNavItem>*/}
 							<Divider />
 							<TertiaryNavItem path="/title">
 								<Title>Troubleshooting</Title>

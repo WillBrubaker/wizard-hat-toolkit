@@ -1,5 +1,10 @@
 ## Changelog
 
+### 1.2
+* Week 3 section added with some content
+* Jurassic Tube feature added
+
+
 ### 1.1.1
 * Dark mode CSS added
 * Shop config button spinners detached from one another

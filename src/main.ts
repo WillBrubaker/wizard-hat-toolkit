@@ -22,32 +22,24 @@ export default function (context) {
 
 	ipcMain.on('save-username', (event, username) => {
 		LocalMain.UserData.set('wpuserName', username);
-		
-	})
+		LocalMain.UserData.set('sshkeyCopied', true);
+	});
 
 	ipcMain.on('save-subdomain', (event, subdomain, siteId) => {
 		const subdomains = LocalMain.UserData.get('subdomains');
 		subdomains[siteId] = subdomain;
 		LocalMain.UserData.set('subdomains', subdomains);
-		LocalMain.sendIPCEvent('debug-message', LocalMain.UserData.get('subdomains'))
-	})
+	});
 
 	ipcMain.on('get-jtubeStuff', (event, siteId) => {
 		const subdomains = LocalMain.UserData.get('subdomains');
 		const subdomain = subdomains ? subdomains[siteId] : null;
-		LocalMain.sendIPCEvent("debug-message", subdomains);
-		LocalMain.sendIPCEvent('jtubeStuff', [{ userDataPath: context.environment.userDataPath }, { jtubeInstalled: fs.existsSync(context.environment.userHome + '/jurassictube/jurassictube.sh') }, {wpUsername: LocalMain.UserData.get('wpuserName')}, {subdomain: subdomain}])
+		LocalMain.sendIPCEvent('jtubeStuff', [{ userDataPath: context.environment.userDataPath }, { jtubeInstalled: fs.existsSync(context.environment.userHome + '/jurassictube/jurassictube.sh') }, {wpUsername: LocalMain.UserData.get('wpuserName')}, {subdomain: subdomain}, {userHome: context.environment.userHome}, {sshkeyCopied: LocalMain.UserData.get('sshkeyCopied')}])
 	});
-
-	ipcMain.on('get-context', async () => {
-		LocalMain.getServiceContainer().cradle.localLogger.log('info', LocalMain.SiteData);
-		LocalMain.sendIPCEvent("debug-message", LocalMain.SiteData);
-	});
-
 
 	ipcMain.on('is-token-valid', () => {
 		LocalMain.sendIPCEvent('token-is-valid', validToken);
-	})
+	});
 
 	ipcMain.on("install-plugins", async (event, pluginsToInstall, siteId) => {
 		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
@@ -59,13 +51,12 @@ export default function (context) {
 		installThemes(themesToInstall, site);
 	});
 
-
 	ipcMain.on("get-order-id", async (event, siteId) => {
 		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
 		await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["post", "list", "--post_type=shop_order", "--posts_per_page=1", "--fields=ID", "--format=json"]).then(function (result) {
 			LocalMain.sendIPCEvent('got-order-id', result);
-		})
-	})
+		});
+	});
 
 	ipcMain.on("get-premium-plugin-selections", async () => {
 		if (validToken && !premiumPluginSelections.length) {
@@ -124,6 +115,24 @@ export default function (context) {
 			LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
 		}).then(async () => {
 			await LocalMain.getServiceContainer().cradle.wpCli.run(site, ["plugin", "install", outputFile, "--activate", "--force"]).then(function () {
+				const options = {
+					wcpaydev_proxy: false,
+					wcpaydev_redirect: false,
+					wcpaydev_redirect_localhost: false,
+					wcpaydev_display_notice: true,
+				}
+				for (var option in options) {
+					LocalMain.getServiceContainer().cradle.wpCli.run(site, [
+						'option',
+						'set',
+						option,
+						options[option],
+					]).then(function () { }, function (err) {
+						LocalMain.sendIPCEvent('error');
+						LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+					});
+				}
+			}).then(function () {
 
 				fs.unlink(outputFile, (err) => {
 					if (err) {
@@ -168,7 +177,6 @@ export default function (context) {
 		}
 		LocalMain.sendIPCEvent("premium-theme-selections", premiumThemeSelections);
 	});
-
 
 	ipcMain.on("install-woocommerce", async (event, siteId, path) => {
 		var error = false;
@@ -327,19 +335,6 @@ export default function (context) {
 			});
 	}
 
-	const isJtubeInstalled = () => {
-		const path = context.environment.userHome + '/jurassictube/jurassictube.sh'
-
-		try {
-			if (fs.existsSync(path)) {
-				return true;
-			}
-		} catch (err) {
-			LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
-			return false;
-		}
-		return false;
-	}
 	function installPlugins(pluginsToInstall, site) {
 		let dotOrgPlugins = [];
 		let premiumPlugins = [];
