@@ -28,9 +28,7 @@ export default class Jurassictube extends Component {
 			editDomain: false,
 			subdomain: null,
 			wpUsername: null,
-			httpPort: (props.sites[props.match.params.siteID].services.nginx) ? props.sites[props.match.params.siteID].services.nginx.ports
-			.HTTP : props.sites[props.match.params.siteID].services.apache.ports
-			.HTTP,
+			httpPort: (props.sites[props.match.params.siteID].services.nginx) ? props.sites[props.match.params.siteID].services.nginx.ports.HTTP : props.sites[props.match.params.siteID].services.apache.ports.HTTP,
 			webroot: props.sites[props.match.params.siteID].path,
 			userHome: null,
 			isInstalled: null,
@@ -295,10 +293,10 @@ export default class Jurassictube extends Component {
 				throw err;
 			}
 			const siteUrlRegex =
-				/define.*WP_SITEURL.*,.*https.*HTTP_HOST.*\);/;
+				/define.*WP_SITEURL.*,.*http.*HTTP_HOST.*\);/;
 			const siteUrlDefined = data.match(siteUrlRegex);
 			const homeUrlRegex =
-				/define.*WP_HOME.*,.*https.*HTTP_HOST.*\);/;
+				/define.*WP_HOME.*,.*http.*HTTP_HOST.*\);/;
 			const homeUrlDefined = data.match(homeUrlRegex);
 			if (!homeUrlDefined || !siteUrlDefined) {
 				let newData = data.replace(
