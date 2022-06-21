@@ -1,7 +1,7 @@
 {
     "name": "wizard-hat-toolkit",
     "productName": "Wizard Hat Toolkit",
-    "version": "1.2",
+    "version": "1.2.1",
     "author": "Will Brubaker",
     "keywords": [
         "local-addon"

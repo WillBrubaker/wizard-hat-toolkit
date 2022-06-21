@@ -1,5 +1,8 @@
 ## Changelog
 
+### 1.2.1
+* Don't limit JT port assignment to nginx
+
 ### 1.2
 * Week 3 section added with some content
 * Jurassic Tube feature added
