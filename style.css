@@ -6,7 +6,7 @@
     margin: 1em;
 }
 
-ul.wizard-hat li { 
+ul.wizard-hat li {
     width: 100%;
     float: left;
 }
@@ -16,6 +16,7 @@ div.gh-token input {
     height: 50px;
     padding: .5em;
 }
+
 div.gh-token svg {
     width: 40px;
     height: 45px;
@@ -39,7 +40,8 @@ div#wootertiarynav ul {
 }
 
 
-html.Theme__Dark .PasswordToggleInput:focus, .PasswordToggleInput:focus {
+html.Theme__Dark .PasswordToggleInput:focus,
+.PasswordToggleInput:focus {
     outline: none;
     box-shadow: inset 0 0 0 1px #51bb7b;
     border-color: transparent;
@@ -50,6 +52,16 @@ html.Theme__Dark .PasswordToggleInput {
     background-color: #262727;
 }
 
-html.Theme__Dark .css-1s2u09g-control, html.Theme__Dark  .plugin-select > div, html.Theme__Dark #react-select-2-listbox {
+html.Theme__Dark .css-1s2u09g-control,
+html.Theme__Dark .plugin-select>div,
+html.Theme__Dark #react-select-2-listbox {
     background-color: #262727;
+}
+
+html.Theme__Dark div.woo div.plugin-select div {
+    color: #fff;
+}
+
+button.active {
+    text-decoration: underline;
 }
