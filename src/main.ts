@@ -16,6 +16,42 @@ export default function (context) {
 	let premiumThemeInfo = {};
 	let premiumThemeSelections = [];
 
+	ipcMain.on('set-options', async (event, options, siteId) => {
+		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
+		for (var option in options) {
+			LocalMain.getServiceContainer().cradle.wpCli.run(site, [
+				'option',
+				'set',
+				option,
+				options[option],
+			]).then(function () {
+				LocalMain.sendIPCEvent('spinner-done');
+			 }, function (err) {
+				LocalMain.sendIPCEvent('error');
+				LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+				LocalMain.sendIPCEvent('spinner-done');
+			});
+		}
+	});
+
+	ipcMain.on('enable-paypal-standard', async (event, siteId) => {
+		const site = LocalMain.getServiceContainer().cradle.siteData.getSite(siteId);
+			LocalMain.getServiceContainer().cradle.wpCli.run(site, [
+				'option',
+				'patch',
+				'update',
+				'woocommerce_paypal_settings',
+				'_should_load',
+				'yes',
+			]).then(function () { 
+				LocalMain.sendIPCEvent('spinner-done');
+			}, function (err) {
+				LocalMain.sendIPCEvent('error');
+				LocalMain.getServiceContainer().cradle.localLogger.log('error', err);
+				LocalMain.sendIPCEvent('spinner-done');				
+			});
+	});
+
 	ipcMain.on('test-request', async () => {
 		download("", "");
 	});
@@ -192,6 +228,7 @@ export default function (context) {
 			woocommerce_price_decimal_sep: ".",
 			woocommerce_weight_unit: "lbs",
 			woocommerce_dimension_unit: "in",
+			woocommerce_calc_taxes: "yes",
 		}
 
 		const commands = [
