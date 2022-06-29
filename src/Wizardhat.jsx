@@ -2,6 +2,7 @@ import React from "react";
 import { ipcRenderer } from "electron";
 import Troubleshooting from "./troubleshooting-excercise";
 import WeekThree from "./WeekThree";
+import WeekFour from "./WeekFour";
 import Jurassictube from "./Jurassictube";
 const { exec } = require("child_process");
 // https://github.com/getflywheel/local-components
@@ -19,9 +20,6 @@ import {
 	List,
 	TextButton,
 	Banner,
-	AdvancedToggle,
-	Stepper,
-	Step,
 } from "@getflywheel/local-components";
 import Select from "react-select";
 export default class Wizardhat extends React.Component {
@@ -58,6 +56,7 @@ export default class Wizardhat extends React.Component {
 			this.installBundleAddonPlugins.bind(this);
 		this.troubleshootingContent = this.troubleshootingContent.bind(this);
 		this.weekThreeContent = this.weekThreeContent.bind(this);
+		this.weekFourContent = this.weekFourContent.bind(this);
 		this.jurassicTube = this.jurassicTube.bind(this);
 	}
 
@@ -86,7 +85,7 @@ export default class Wizardhat extends React.Component {
 			});
 			ipcRenderer.send("get-premium-plugin-selections");
 			ipcRenderer.send("get-premium-theme-selections");
-			ipcRenderer.send('token-is-valid', args.valid);
+			ipcRenderer.send("token-is-valid", args.valid);
 		});
 
 		ipcRenderer.on("premium-plugin-selections", (event, args) => {
@@ -94,7 +93,7 @@ export default class Wizardhat extends React.Component {
 				premiumPluginSelections: args,
 			});
 		});
-		
+
 		ipcRenderer.on("premium-theme-selections", (event, args) => {
 			this.setState({
 				premiumThemeSelections: args,
@@ -141,9 +140,9 @@ export default class Wizardhat extends React.Component {
 
 		ipcRenderer.send("validate-token");
 
-		ipcRenderer.on('is-token-valid', () => {
-			ipcRenderer.send('token-is-valid', this.state.tokenIsValid);
-		})
+		ipcRenderer.on("is-token-valid", () => {
+			ipcRenderer.send("token-is-valid", this.state.tokenIsValid);
+		});
 	}
 
 	componentWillUnmount() {
@@ -173,7 +172,7 @@ export default class Wizardhat extends React.Component {
 		});
 		this.setState({
 			switchingTo: newLocale,
-		})
+		});
 		ipcRenderer.send("switch-country", this.state.siteId, optionsToSet);
 		this.localeSwitchedTo = newLocale;
 	}
@@ -252,40 +251,45 @@ export default class Wizardhat extends React.Component {
 				<div>
 					<div id="week-1-content">
 						<TextButton
-							onClick={() => {
-								this.setState({ dayContent: 1 });
-							}}
-						>
-							Day One
-						</TextButton>
-						<TextButton
-							onClick={() => {
-								this.setState({ dayContent: 2 });
-							}}
-						>
-							Day Two
-						</TextButton>
-						<TextButton
-							onClick={() => {
-								this.setState({ dayContent: 3 });
-							}}
-						>
-							Day Three
-						</TextButton>
-						<TextButton
-							onClick={() => {
-								this.setState({ dayContent: 4 });
-							}}
-						>
-							Day Four
-						</TextButton>
-						<TextButton
-							onClick={() => {
-								this.setState({ dayContent: 5 });
-							}}
-						>
-							Day Five
-						</TextButton>
+						onClick={() => {
+							this.setState({ dayContent: 1 });
+						}}
+						className={this.state.dayContent === 1 ? "active" : null}
+					>
+						Day One
+					</TextButton>
+					<TextButton
+						onClick={() => {
+							this.setState({ dayContent: 2 });
+						}}
+						className={this.state.dayContent === 2 ? "active" : null}
+					>
+						Day Two
+					</TextButton>
+					<TextButton
+						onClick={() => {
+							this.setState({ dayContent: 3 });
+						}}
+						className={this.state.dayContent === 3 ? "active" : null}
+					>
+						Day Three
+					</TextButton>
+					<TextButton
+						onClick={() => {
+							this.setState({ dayContent: 4 });
+						}}
+						className={this.state.dayContent === 4 ? "active" : null}
+					>
+						Day Four
+					</TextButton>
+					<TextButton
+						onClick={() => {
+							this.setState({ dayContent: 5 });
+						}}
+						className={this.state.dayContent === 5 ? "active" : null}
+					>
+						Day Five
+					</TextButton>
 						{this.dayContent(2)}
 					</div>
 				</div>
@@ -359,7 +363,7 @@ export default class Wizardhat extends React.Component {
 			this.state.siteId
 		);
 	}
-	
+
 	installThemes(themesToInstall) {
 		this.setState({
 			showSpinner: true,
@@ -367,11 +371,7 @@ export default class Wizardhat extends React.Component {
 		this.setState({
 			installingThemes: true,
 		});
-		ipcRenderer.send(
-			"install-themes",
-			themesToInstall,
-			this.state.siteId
-		);
+		ipcRenderer.send("install-themes", themesToInstall, this.state.siteId);
 	}
 
 	installWoocommerce() {
@@ -392,13 +392,11 @@ export default class Wizardhat extends React.Component {
 					case 1:
 						return (
 							<Card
-								title={
-									<Title style={{ margin: "1em" }}>
-										Day 1
-									</Title>
-								}
 								content={
 									<div>
+										<Title style={{ margin: "1em" }}>
+											Day 1
+										</Title>
 										<p>
 											Today you will be installing
 											WooCommerce and demo content and
@@ -425,8 +423,11 @@ export default class Wizardhat extends React.Component {
 													this.installWoocommerce
 												}
 											>
-												Install{this.state.showSpinner ? "ing" : null} WooCommerce & Demo
-												Content
+												Install
+												{this.state.showSpinner
+													? "ing"
+													: null}{" "}
+												WooCommerce & Demo Content
 												{this.renderSpinner()}
 											</Button>
 										</p>
@@ -613,13 +614,11 @@ export default class Wizardhat extends React.Component {
 					case 2:
 						return (
 							<Card
-								title={
-									<Title style={{ margin: "1em" }}>
-										Day 2
-									</Title>
-								}
 								content={
 									<div>
+										<Title style={{ margin: "1em" }}>
+											Day 2
+										</Title>
 										<p>
 											Today you will be reviewing the
 											WooCommerce system status report and
@@ -715,13 +714,11 @@ export default class Wizardhat extends React.Component {
 					case 3:
 						return (
 							<Card
-								title={
-									<Title style={{ margin: "1em" }}>
-										Day 3
-									</Title>
-								}
 								content={
 									<div>
+										<Title style={{ margin: "1em" }}>
+											Day 3
+										</Title>
 										<p>
 											Today you will be diving into
 											extensions on the WooCommerce
@@ -789,13 +786,11 @@ export default class Wizardhat extends React.Component {
 					case 4:
 						return (
 							<Card
-								title={
-									<Title style={{ margin: "1em" }}>
-										Day 4
-									</Title>
-								}
 								content={
 									<div>
+										<Title style={{ margin: "1em" }}>
+											Day 4
+										</Title>
 										<p>
 											You'll be working with
 											WooCommerce.com accounts today. The
@@ -846,13 +841,11 @@ export default class Wizardhat extends React.Component {
 					case 5:
 						return (
 							<Card
-								title={
-									<Title style={{ margin: "1em" }}>
-										Day 5
-									</Title>
-								}
 								content={
 									<div>
+										<Title style={{ margin: "1em" }}>
+											Day 5
+										</Title>
 										<p>
 											Today you will be working with the
 											Storefront theme, child themes, and
@@ -893,10 +886,20 @@ export default class Wizardhat extends React.Component {
 														]
 													)}
 													className="woo button"
-													disabled={this.state.showSpinner}
+													disabled={
+														this.state.showSpinner
+													}
 												>
-													Install{this.state.installingPlugins ? "ing" : null} Plugins
-													{this.state.installingPlugins ? this.renderSpinner() : null}
+													Install
+													{this.state
+														.installingPlugins
+														? "ing"
+														: null}{" "}
+													Plugins
+													{this.state
+														.installingPlugins
+														? this.renderSpinner()
+														: null}
 												</Button>
 											) : (
 												this.tokenInput()
@@ -909,10 +912,12 @@ export default class Wizardhat extends React.Component {
 												margin: "1em",
 											}}
 										/>
-										<p style={{
-											width: "100%",
-											float: "left",
-										}}>
+										<p
+											style={{
+												width: "100%",
+												float: "left",
+											}}
+										>
 											Use the button below to install all
 											of the necessary themes for today's
 											agenda.
@@ -939,10 +944,18 @@ export default class Wizardhat extends React.Component {
 														]
 													)}
 													className="woo button"
-													disabled={this.state.showSpinner}
+													disabled={
+														this.state.showSpinner
+													}
 												>
-													Install{this.state.installingThemes ? "ing" : null} Themes
-													{this.state.installingThemes ? this.renderSpinner() : null}
+													Install
+													{this.state.installingThemes
+														? "ing"
+														: null}{" "}
+													Themes
+													{this.state.installingThemes
+														? this.renderSpinner()
+														: null}
 												</Button>
 											) : (
 												this.tokenInput()
@@ -956,7 +969,7 @@ export default class Wizardhat extends React.Component {
 						return null;
 				}
 			case 3:
-				return (<div>hello week three</div>);
+				return <div>hello week three</div>;
 		}
 	}
 
@@ -979,8 +992,14 @@ export default class Wizardhat extends React.Component {
 					className="woo button"
 					disabled={this.state.showSpinner}
 				>
-					Switch{"United States" === this.state.switchingTo ? "ing" : null} Site to United States
-					{"United States" === this.state.switchingTo ? this.renderSpinner() : null}
+					Switch
+					{"United States" === this.state.switchingTo
+						? "ing"
+						: null}{" "}
+					Site to United States
+					{"United States" === this.state.switchingTo
+						? this.renderSpinner()
+						: null}
 				</Button>
 			</li>
 			<li>
@@ -1000,8 +1019,11 @@ export default class Wizardhat extends React.Component {
 					className="woo button"
 					disabled={this.state.showSpinner}
 				>
-					Switch{"Europe" === this.state.switchingTo ? "ing" : null} Site to Europe
-					{"Europe" === this.state.switchingTo ? this.renderSpinner() : null}
+					Switch{"Europe" === this.state.switchingTo ? "ing" : null}{" "}
+					Site to Europe
+					{"Europe" === this.state.switchingTo
+						? this.renderSpinner()
+						: null}
 				</Button>
 			</li>
 			<li>
@@ -1022,8 +1044,12 @@ export default class Wizardhat extends React.Component {
 					className="woo button"
 					disabled={this.state.showSpinner}
 				>
-					Switch{"Australia" === this.state.switchingTo ? "ing" : null} Site to Australia
-					{"Australia" === this.state.switchingTo ? this.renderSpinner() : null}
+					Switch
+					{"Australia" === this.state.switchingTo ? "ing" : null} Site
+					to Australia
+					{"Australia" === this.state.switchingTo
+						? this.renderSpinner()
+						: null}
 				</Button>
 			</li>
 			<li>
@@ -1043,8 +1069,11 @@ export default class Wizardhat extends React.Component {
 					className="woo button"
 					disabled={this.state.showSpinner}
 				>
-					Switch{"Canada" === this.state.switchingTo ? "ing" : null} Site to Canada
-					{"Canada" === this.state.switchingTo ? this.renderSpinner() : null}
+					Switch{"Canada" === this.state.switchingTo ? "ing" : null}{" "}
+					Site to Canada
+					{"Canada" === this.state.switchingTo
+						? this.renderSpinner()
+						: null}
 				</Button>
 			</li>
 			<li>
@@ -1064,8 +1093,35 @@ export default class Wizardhat extends React.Component {
 					className="woo button"
 					disabled={this.state.showSpinner}
 				>
-					Switch{"U.K." === this.state.switchingTo ? "ing" : null} Site to United Kingdom
-					{"U.K." === this.state.switchingTo ? this.renderSpinner() : null}
+					Switch{"U.K." === this.state.switchingTo ? "ing" : null}{" "}
+					Site to United Kingdom
+					{"U.K." === this.state.switchingTo
+						? this.renderSpinner()
+						: null}
+				</Button>
+			</li>
+			<li>
+				<Button
+					onClick={this.switchCountry.bind(this, "South Africa", {
+						woocommerce_store_address: "2160 South St",
+						woocommerce_store_address_2: "",
+						woocommerce_store_city: "Voortrekkerhoogte",
+						woocommerce_default_country: "ZA:GP",
+						woocommerce_store_postcode: "0187",
+						woocommerce_currency: "ZAR",
+						woocommerce_price_thousand_sep: " ",
+						woocommerce_price_decimal_sep: ",",
+						woocommerce_weight_unit: "kg",
+						woocommerce_dimension_unit: "cm",
+					})}
+					className="woo button"
+					disabled={this.state.showSpinner}
+				>
+					Switch{"South Africa" === this.state.switchingTo ? "ing" : null}{" "}
+					Site to South Africa
+					{"South Africa" === this.state.switchingTo
+						? this.renderSpinner()
+						: null}
 				</Button>
 			</li>
 		</ul>
@@ -1089,21 +1145,20 @@ export default class Wizardhat extends React.Component {
 			}}
 			class="woo gh-token"
 		>
-				<p>
-					This content requires a valid{" "}
-					<a href="https://github.com/settings/tokens">
-						GitHub token
-					</a>{" "}
-					with 'repo' scope enabled.
-				</p>
-				<p>Please enter a valid token to continue.</p>
-				<p><InputPasswordToggle
+			<p>
+				This content requires a valid{" "}
+				<a href="https://github.com/settings/tokens">GitHub token</a>{" "}
+				with 'repo' scope enabled.
+			</p>
+			<p>Please enter a valid token to continue.</p>
+			<p>
+				<InputPasswordToggle
 					onChange={(event) =>
 						this.maybeSaveToken(event.target.value)
 					}
 					onBlur={(event) => this.maybeSaveToken(event.target.value)}
-					
-				/></p>
+				/>
+			</p>
 		</div>
 	);
 
@@ -1124,7 +1179,7 @@ export default class Wizardhat extends React.Component {
 				<div style={{ width: "90%", margin: "1em" }}>
 					<Select
 						options={this.state.premiumPluginSelections}
-						placeholder={"Select plugin to install..."}
+						placeholder={"Select plugin(s) to install..."}
 						onChange={this.handlePluginSelectionChange}
 						name="plugin_slug"
 						style={{
@@ -1164,8 +1219,12 @@ export default class Wizardhat extends React.Component {
 		return new WeekThree(this.props);
 	}
 
+	weekFourContent() {
+		return new WeekFour(this.props);
+	}
+
 	jurassicTube() {
-		return new Jurassictube(this.props)
+		return new Jurassictube(this.props);
 	}
 
 	render() {
@@ -1194,6 +1253,12 @@ export default class Wizardhat extends React.Component {
 								component={this.weekThreeContent}
 							>
 								Week 3
+							</TertiaryNavItem>
+							<TertiaryNavItem
+								path="/week4"
+								component={this.weekFourContent}
+							>
+								Week 4
 							</TertiaryNavItem>
 							<Divider />
 							<TertiaryNavItem path="/title">
