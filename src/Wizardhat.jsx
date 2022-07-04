@@ -3,6 +3,7 @@ import { ipcRenderer } from "electron";
 import Troubleshooting from "./troubleshooting-excercise";
 import WeekThree from "./WeekThree";
 import WeekFour from "./WeekFour";
+import WeekFive from "./WeekFive";
 import Jurassictube from "./Jurassictube";
 const { exec } = require("child_process");
 // https://github.com/getflywheel/local-components
@@ -57,6 +58,7 @@ export default class Wizardhat extends React.Component {
 		this.troubleshootingContent = this.troubleshootingContent.bind(this);
 		this.weekThreeContent = this.weekThreeContent.bind(this);
 		this.weekFourContent = this.weekFourContent.bind(this);
+		this.weekFiveContent = this.weekFiveContent.bind(this);
 		this.jurassicTube = this.jurassicTube.bind(this);
 	}
 
@@ -1223,6 +1225,10 @@ export default class Wizardhat extends React.Component {
 		return new WeekFour(this.props);
 	}
 
+	weekFiveContent() {
+		return new WeekFive(this.props);
+	}
+
 	jurassicTube() {
 		return new Jurassictube(this.props);
 	}
@@ -1259,6 +1265,12 @@ export default class Wizardhat extends React.Component {
 								component={this.weekFourContent}
 							>
 								Week 4
+							</TertiaryNavItem>
+							<TertiaryNavItem
+								path="/week5"
+								component={this.weekFiveContent}
+							>
+								Week 5
 							</TertiaryNavItem>
 							<Divider />
 							<TertiaryNavItem path="/title">

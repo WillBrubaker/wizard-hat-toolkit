@@ -810,7 +810,7 @@ export default class WeekFour extends Component {
 	render() {
 		return (
 			<div>
-				<div id="week-2-content">
+				<div id="week-4-content">
 					<TextButton
 						onClick={() => {
 							this.setState({ day: 1 });
