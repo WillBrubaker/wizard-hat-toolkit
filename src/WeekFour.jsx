@@ -280,12 +280,12 @@ export default class WeekFour extends Component {
 								</p>
 								<Banner variant="warning" icon="warning">
 									<strong>Note:</strong> Many shipping methods
-									require your site be set to a specific
-									base country and/or currency. It may also make sense to use
-									measurement units for the country the
-									shipping service originates in. See the shop
-									config options for a quick way to change all
-									of these settings:{" "}
+									require your site be set to a specific base
+									country and/or currency. It may also make
+									sense to use measurement units for the
+									country the shipping service originates in.
+									See the shop config options for a quick way
+									to change all of these settings:{" "}
 									<a
 										href={`#/main/site-info/${this.state.siteId}/wizard-hat-toolkit/shop-config`}
 									>
@@ -615,29 +615,33 @@ export default class WeekFour extends Component {
 								/>
 
 								<p>
-									<Button
-										onClick={this.installAndActivatePlugins.bind(
-											this,
-											[
-												"woocommerce-shipstation-integration",
-												"woocommerce-shipping-stamps",
-												"woocommerce-shipment-tracking",
-												"woocommerce-shipping-per-product",
-												"woocommerce-shipping-multiple-addresses",
-												"woocommerce-warranty",
-												"woocommerce-advanced-notifications",
-												"woocommerce-conditional-shipping-and-payments",
-											]
-										)}
-										className="woo button"
-									>
-										Install
-										{this.state.installingPlugins
-											? "ing"
-											: null}{" "}
-										Plugins
-										{this.renderSpinner()}
-									</Button>
+									{this.state.tokenIsValid ? (
+										<Button
+											onClick={this.installAndActivatePlugins.bind(
+												this,
+												[
+													"woocommerce-shipstation-integration",
+													"woocommerce-shipping-stamps",
+													"woocommerce-shipment-tracking",
+													"woocommerce-shipping-per-product",
+													"woocommerce-shipping-multiple-addresses",
+													"woocommerce-warranty",
+													"woocommerce-advanced-notifications",
+													"woocommerce-conditional-shipping-and-payments",
+												]
+											)}
+											className="woo button"
+										>
+											Install
+											{this.state.installingPlugins
+												? "ing"
+												: null}{" "}
+											Plugins
+											{this.renderSpinner()}
+										</Button>
+									) : (
+										this.tokenInput()
+									)}
 								</p>
 								<Divider
 									style={{
@@ -662,35 +666,39 @@ export default class WeekFour extends Component {
 										listItemFontWeight="300"
 									>
 										<li>
-										<a
+											<a
 												href={`http://${
 													this.props.sites[
 														this.props
 															.selectedSites[0]
 													].domain
-												}/wp-admin/admin.php?page=wc-settings&tab=integration&section=shipstation`}>
+												}/wp-admin/admin.php?page=wc-settings&tab=integration&section=shipstation`}
+											>
 												Visit ShipStation Settings
 											</a>
 										</li>
-									<li>
-										<a
+										<li>
+											<a
 												href={`http://${
 													this.props.sites[
 														this.props
 															.selectedSites[0]
 													].domain
-												}/wp-admin/admin.php?page=wc-settings&tab=stamps`}>
-												Visit Stamps.com API integration Settings
+												}/wp-admin/admin.php?page=wc-settings&tab=stamps`}
+											>
+												Visit Stamps.com API integration
+												Settings
 											</a>
 										</li>
 										<li>
 											<a href="https://woocommerce.com/document/shipstation-for-woocommerce/">
-											ShipStation Documentation
+												ShipStation Documentation
 											</a>
 										</li>
 										<li>
 											<a href="https://woocommerce.com/document/woocommerce-shipping-stamps/">
-											Stamps.com API integration Documentation
+												Stamps.com API integration
+												Documentation
 											</a>
 										</li>
 									</List>
@@ -705,7 +713,91 @@ export default class WeekFour extends Component {
 						content={
 							<div style={{ fontSize: 16 }}>
 								<Title style={{ margin: "1em" }}>Day 5</Title>
-								under construction
+								<p>
+									Today you'll be familiarizing yourself with
+									some thrid party shipping related
+									extensions.
+								</p>
+								<p>
+									Use the button below to install the plugins
+									covered in today's agenda.
+								</p>
+								<Divider />
+								<p>
+									{this.state.tokenIsValid ? (
+										<Button
+											onClick={this.installAndActivatePlugins.bind(
+												this,
+												[
+													"woocommerce-advanced-shipping-packages",
+													"woocommerce-shipping-local-pickup-plus",
+													"woocommerce-order-delivery",
+													"delivery-slots-for-woocommerce",
+													"iconic-woo-delivery-slots",
+													"woocommerce-pip",
+												]
+											)}
+											className="woo button"
+										>
+											Install
+											{this.state.installingPlugins
+												? "ing"
+												: null}{" "}
+											Plugins
+											{this.renderSpinner()}
+										</Button>
+									) : (
+										this.tokenInput()
+									)}
+								</p>
+								<div
+									id="list"
+									style={{
+										width: "100%",
+										float: "left",
+									}}
+								>
+									<List
+										style={{ width: "100%" }}
+										bullets={true}
+										headerHasDivider={true}
+										headerText="Shipping Related Plugin Documentation"
+										listItemFontWeight="300"
+									>
+										<li>
+											<a href="https://woocommerce.com/document/woocommerce-advanced-shipping-packages/">
+												Advanced Shipping Packages
+											</a>
+										</li>
+										<li>
+											<a
+												href="http://docs.woocommerce.com/document/local-pickup-plus"
+											>
+												Local Pickup Plus
+											</a>
+										</li>
+										<li>
+											<a href="https://docs.woocommerce.com/document/woocommerce-order-delivery/">
+											Order Delivery for WooCommerce
+											</a>
+										</li>
+										<li>
+											<a href="https://docs.woocommerce.com/document/delivery-slots-for-woocommerce/">
+											Delivery Slots for WooCommerce
+											</a>
+										</li>
+									<li>
+											<a href="https://docs.woocommerce.com/document/iconic-delivery-slots-for-woocommerce/">
+											Iconic Delivery Slots for WooCommerce
+											</a>
+										</li>
+									<li>
+											<a href="http://docs.woocommerce.com/document/woocommerce-print-invoice-packing-list">
+											WooCommerce Print Invoices and Packing Lists
+											</a>
+										</li>
+									</List>
+								</div>
 							</div>
 						}
 					/>
