@@ -33,6 +33,14 @@ export default class WeekThree extends Component {
 			this.setState({
 				installingPlugins: false,
 			});
+			this.setState({ enablingPaypal: null });
+		});
+
+		ipcRenderer.send("what-day");
+		ipcRenderer.on("is-day", (event, args) => {
+			if (args && args.three) {
+				this.setState({ day: args.three });
+			}
 		});
 
 		ipcRenderer.send("is-token-valid");
@@ -55,6 +63,7 @@ export default class WeekThree extends Component {
 		ipcRenderer.removeAllListeners("spinner-done");
 		ipcRenderer.removeAllListeners("gh-token");
 		ipcRenderer.removeAllListeners("token-is-valid");
+		ipcRenderer.removeAllListeners("is-day");
 	}
 
 	renderSpinner() {
@@ -697,16 +706,17 @@ export default class WeekThree extends Component {
 		}
 	}
 
+	setDay(day) {
+		ipcRenderer.send("set-day", "three", day);
+	}
+
 	render() {
-		if (null === this.state.day) {
-			this.setState({day: 1})
-		}
 		return (
 			<div>
 				<div id="week-3-content">
-				<TextButton
+					<TextButton
 						onClick={() => {
-							this.setState({ day: 1 });
+							this.setDay(1);
 						}}
 						className={this.state.day === 1 ? "active" : null}
 					>
@@ -714,7 +724,7 @@ export default class WeekThree extends Component {
 					</TextButton>
 					<TextButton
 						onClick={() => {
-							this.setState({ day: 2 });
+							this.setDay(2);
 						}}
 						className={this.state.day === 2 ? "active" : null}
 					>
@@ -722,7 +732,7 @@ export default class WeekThree extends Component {
 					</TextButton>
 					<TextButton
 						onClick={() => {
-							this.setState({ day: 3 });
+							this.setDay(3);
 						}}
 						className={this.state.day === 3 ? "active" : null}
 					>
@@ -730,7 +740,7 @@ export default class WeekThree extends Component {
 					</TextButton>
 					<TextButton
 						onClick={() => {
-							this.setState({ day: 4 });
+							this.setDay(4);
 						}}
 						className={this.state.day === 4 ? "active" : null}
 					>
@@ -738,7 +748,7 @@ export default class WeekThree extends Component {
 					</TextButton>
 					<TextButton
 						onClick={() => {
-							this.setState({ day: 5 });
+							this.setDay(5);
 						}}
 						className={this.state.day === 5 ? "active" : null}
 					>

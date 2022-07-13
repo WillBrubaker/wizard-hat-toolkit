@@ -18,7 +18,7 @@ export default class WeekFour extends Component {
 		this.state = {
 			siteId: props.match.params.siteID,
 			showSpinner: false,
-			day: 1,
+			day: null,
 			tokenIsValid: null,
 			installingPlugins: false,
 		};
@@ -41,6 +41,14 @@ export default class WeekFour extends Component {
 				tokenIsValid: args.valid,
 			});
 		});
+
+		ipcRenderer.send("what-day");
+		ipcRenderer.on('is-day', (event, args) => {
+			if (args && args.four) {
+				this.setState({day: args.four})
+			}
+		});
+
 
 		ipcRenderer.on("token-is-valid", (event, tokenIsValid) => {
 			this.setState({
@@ -807,13 +815,17 @@ export default class WeekFour extends Component {
 		}
 	}
 
+	setDay(day) {
+		ipcRenderer.send("set-day", 'four', day);
+	}
+
 	render() {
 		return (
 			<div>
 				<div id="week-4-content">
-					<TextButton
+				<TextButton
 						onClick={() => {
-							this.setState({ day: 1 });
+							this.setDay(1);
 						}}
 						className={this.state.day === 1 ? "active" : null}
 					>
@@ -821,7 +833,7 @@ export default class WeekFour extends Component {
 					</TextButton>
 					<TextButton
 						onClick={() => {
-							this.setState({ day: 2 });
+							this.setDay(2);
 						}}
 						className={this.state.day === 2 ? "active" : null}
 					>
@@ -829,7 +841,7 @@ export default class WeekFour extends Component {
 					</TextButton>
 					<TextButton
 						onClick={() => {
-							this.setState({ day: 3 });
+							this.setDay(3);
 						}}
 						className={this.state.day === 3 ? "active" : null}
 					>
@@ -837,7 +849,7 @@ export default class WeekFour extends Component {
 					</TextButton>
 					<TextButton
 						onClick={() => {
-							this.setState({ day: 4 });
+							this.setDay(4);
 						}}
 						className={this.state.day === 4 ? "active" : null}
 					>
@@ -845,7 +857,7 @@ export default class WeekFour extends Component {
 					</TextButton>
 					<TextButton
 						onClick={() => {
-							this.setState({ day: 5 });
+							this.setDay(5);
 						}}
 						className={this.state.day === 5 ? "active" : null}
 					>

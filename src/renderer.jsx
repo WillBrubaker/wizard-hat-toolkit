@@ -9,7 +9,6 @@ export default function ( context ) {
 	const {React, hooks} = context;
 	const {Route} = context.ReactRouter;
 	const stylesheetPath = path.resolve(__dirname, '../style.css');
-
 	//insert our stylesheet
 	hooks.addContent('stylesheets', () => <link rel="stylesheet" key="notes-addon-styleesheet" href={stylesheetPath} />);
 
