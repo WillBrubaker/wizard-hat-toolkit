@@ -21,6 +21,7 @@ export default class WeekThree extends Component {
 			day: null,
 			tokenIsValid: null,
 			installingPlugins: false,
+			enablingPaypal: null,
 		};
 	}
 
@@ -230,8 +231,12 @@ export default class WeekThree extends Component {
 								<Banner variant="warning" icon="warning">
 									<strong>Note:</strong> WooCommerce Payments
 									requires a Jetpack connection. You can use{" "}
-									<a href={`#/main/site-info/${this.state.siteId}/wizard-hat-toolkit/jurassic-tube`}>Jurassic Tube</a>{" "}
-									to do this from a local test site. 
+									<a
+										href={`#/main/site-info/${this.state.siteId}/wizard-hat-toolkit/jurassic-tube`}
+									>
+										Jurassic Tube
+									</a>{" "}
+									to do this from a local test site.
 								</Banner>
 								<Divider
 									style={{
@@ -408,13 +413,15 @@ export default class WeekThree extends Component {
 
 								<p>
 									<Button
-										onClick={this.installAndActivatePlugins.bind(
-											this,
-											[
+										onClick={() => {
+											this.installAndActivatePlugins([
 												"woocommerce-gateway-paypal-powered-by-braintree",
 												"woocommerce-paypal-payments",
-											]
-										)}
+											]);
+											this.setState({
+												enablingPaypal: false,
+											});
+										}}
 										className="woo button"
 									>
 										Install
@@ -422,7 +429,9 @@ export default class WeekThree extends Component {
 											? "ing"
 											: null}{" "}
 										Plugins
-										{this.renderSpinner()}
+										{false === this.state.enablingPaypal
+											? this.renderSpinner()
+											: null}
 									</Button>
 								</p>
 								<Divider
@@ -444,13 +453,18 @@ export default class WeekThree extends Component {
 								</p>
 								<p style={{ width: "100%", float: "left" }}>
 									<Button
-										onClick={this.enablePayPalStandard.bind(
-											this
-										)}
+										onClick={() => {
+											this.enablePayPalStandard();
+											this.setState({
+												enablingPaypal: true,
+											});
+										}}
 										className="woo button"
 									>
 										Enable PayPal Standard
-										{this.renderSpinner()}
+										{true === this.state.enablingPaypal
+											? this.renderSpinner()
+											: null}
 									</Button>
 								</p>
 								<div
@@ -543,26 +557,42 @@ export default class WeekThree extends Component {
 						content={
 							<div style={{ fontSize: 16 }}>
 								<Title style={{ margin: "1em" }}>Day 5</Title>
-								<p>Today you will be introduced to Square, GoCardless, PayFast, SnapScan, eWay, and Affirm payment gateways.</p>
 								<p>
-									Use the button below to install the
-									plugins for today's agenda.
+									Today you will be introduced to Square,
+									GoCardless, PayFast, SnapScan, eWay, and
+									Affirm payment gateways.
+								</p>
+								<p>
+									Use the button below to install the plugins
+									for today's agenda.
 								</p>
 								<Banner variant="warning" icon="warning">
-									<strong>Note:</strong> PayFast uses an ITN (Instant Transaction Notification) system. Likewise other payment gateways may require webhooks for some or all of their functionality. 
-									You can use{" "}
-									<a href={`#/main/site-info/${this.state.siteId}/wizard-hat-toolkit/jurassic-tube`}>Jurassic Tube</a>{" "}
-									to allow access to your site from the internet. 
+									<strong>Note:</strong> PayFast uses an ITN
+									(Instant Transaction Notification) system.
+									Likewise other payment gateways may require
+									webhooks for some or all of their
+									functionality. You can use{" "}
+									<a
+										href={`#/main/site-info/${this.state.siteId}/wizard-hat-toolkit/jurassic-tube`}
+									>
+										Jurassic Tube
+									</a>{" "}
+									to allow access to your site from the
+									internet.
 								</Banner>
-								<Banner
-												variant="warning"
-												icon="warning"
-											>
-												<strong>Note:</strong> Some payment gateways may require your shop address to be in a specific country or a specific currency. See the shop config options for a quick way to change all of these settings:{" "}
-												<a href={`#/main/site-info/${this.state.siteId}/wizard-hat-toolkit/shop-config`}>
-													Shop config switcheroo tool
-												</a>.
-											</Banner>
+								<Banner variant="warning" icon="warning">
+									<strong>Note:</strong> Some payment gateways
+									may require your shop address to be in a
+									specific country or a specific currency. See
+									the shop config options for a quick way to
+									change all of these settings:{" "}
+									<a
+										href={`#/main/site-info/${this.state.siteId}/wizard-hat-toolkit/shop-config`}
+									>
+										Shop config switcheroo tool
+									</a>
+									.
+								</Banner>
 								<Divider
 									style={{
 										width: "100%",
@@ -581,7 +611,7 @@ export default class WeekThree extends Component {
 												"woocommerce-payfast-gateway",
 												"woocommerce-gateway-snapscan",
 												"woocommerce-gateway-eway",
-												"woocommerce-gateway-affirm"
+												"woocommerce-gateway-affirm",
 											]
 										)}
 										className="woo button"
@@ -609,7 +639,7 @@ export default class WeekThree extends Component {
 										listItemFontWeight="300"
 									>
 										<li>
-										<a
+											<a
 												href={`http://${
 													this.props.sites[
 														this.props
@@ -621,10 +651,18 @@ export default class WeekThree extends Component {
 												Settings
 											</a>
 										</li>
-										<li><a href="https://woocommerce.com/document/woocommerce-square/">WooCommerce Square Documentation</a></li>
-										<li><a href="https://wooniversity.wordpress.com/payments/square/">Square on Wooniversity</a></li>
-									<li>
-										<a
+										<li>
+											<a href="https://woocommerce.com/document/woocommerce-square/">
+												WooCommerce Square Documentation
+											</a>
+										</li>
+										<li>
+											<a href="https://wooniversity.wordpress.com/payments/square/">
+												Square on Wooniversity
+											</a>
+										</li>
+										<li>
+											<a
 												href={`http://${
 													this.props.sites[
 														this.props
@@ -636,10 +674,18 @@ export default class WeekThree extends Component {
 												Settings
 											</a>
 										</li>
-										<li><a href="https://woocommerce.com/document/gocardless/">GoCardless Documentation</a></li>
-										<li><a href="https://wooniversity.wordpress.com/payments/gocardless/">GoCardless on Wooniversity</a></li>
 										<li>
-										<a
+											<a href="https://woocommerce.com/document/gocardless/">
+												GoCardless Documentation
+											</a>
+										</li>
+										<li>
+											<a href="https://wooniversity.wordpress.com/payments/gocardless/">
+												GoCardless on Wooniversity
+											</a>
+										</li>
+										<li>
+											<a
 												href={`http://${
 													this.props.sites[
 														this.props
@@ -647,13 +693,16 @@ export default class WeekThree extends Component {
 													].domain
 												}/wp-admin/admin.php?page=wc-settings&tab=checkout&section=&section=payfast`}
 											>
-												Visit PayFast
-												Settings
+												Visit PayFast Settings
 											</a>
 										</li>
-										<li><a href="https://woocommerce.com/document/payfast-payment-gateway/">PayFast Documentation</a></li>
 										<li>
-										<a
+											<a href="https://woocommerce.com/document/payfast-payment-gateway/">
+												PayFast Documentation
+											</a>
+										</li>
+										<li>
+											<a
 												href={`http://${
 													this.props.sites[
 														this.props
@@ -661,13 +710,17 @@ export default class WeekThree extends Component {
 													].domain
 												}/wp-admin/admin.php?page=wc-settings&tab=checkout&section=&section=snapscan`}
 											>
-												Visit SnapScan
-												Settings
+												Visit SnapScan Settings
 											</a>
 										</li>
-										<li><a href="https://woocommerce.com/document/woocommerce-gateway-snapscan/">WooCommerce SnapScan Documentation</a></li>
 										<li>
-										<a
+											<a href="https://woocommerce.com/document/woocommerce-gateway-snapscan/">
+												WooCommerce SnapScan
+												Documentation
+											</a>
+										</li>
+										<li>
+											<a
 												href={`http://${
 													this.props.sites[
 														this.props
@@ -675,13 +728,16 @@ export default class WeekThree extends Component {
 													].domain
 												}/wp-admin/admin.php?page=wc-settings&tab=checkout&section=&section=eway`}
 											>
-												Visit Eway
-												Settings
+												Visit Eway Settings
 											</a>
 										</li>
-										<li><a href="https://woocommerce.com/document/eway/">WooCommerce Eway Documentation</a></li>
 										<li>
-										<a
+											<a href="https://woocommerce.com/document/eway/">
+												WooCommerce Eway Documentation
+											</a>
+										</li>
+										<li>
+											<a
 												href={`http://${
 													this.props.sites[
 														this.props
@@ -689,14 +745,16 @@ export default class WeekThree extends Component {
 													].domain
 												}/wp-admin/admin.php?page=wc-settings&tab=checkout&section=&section=affirm`}
 											>
-												Visit Affirm
-												Settings
+												Visit Affirm Settings
 											</a>
 										</li>
-										<li><a href="https://woocommerce.com/document/woocommerce-gateway-affirm/">WooCommerce Affirm Documentation</a></li>
-										
+										<li>
+											<a href="https://woocommerce.com/document/woocommerce-gateway-affirm/">
+												WooCommerce Affirm Documentation
+											</a>
+										</li>
 									</List>
-									</div>
+								</div>
 							</div>
 						}
 					/>

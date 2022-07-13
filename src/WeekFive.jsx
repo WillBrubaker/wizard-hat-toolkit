@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { ipcRenderer } from "electron";
 import {
 	Button,
-	Banner,
 	Title,
 	Spinner,
 	Card,
@@ -498,14 +497,14 @@ export default class WeekFive extends Component {
 											<a
 												href="https://automatewoo.com/docs/refer-a-friend/"
 											>
-												AutoamteWoo Refer A Friend Documentation
+												AutomateWoo Refer A Friend Documentation
 											</a>
 										</li>
 										<li>
 											<a
 												href="https://automatewoo.com/docs/getting-started-with-birthdays/"
 											>
-												AutoamteWoo Birthday Addon Documentation
+												AutomateWoo Birthday Addon Documentation
 											</a>
 										</li>
 										

@@ -5,7 +5,11 @@ import WeekTwo from "./WeekTwo"
 import WeekThree from "./WeekThree";
 import WeekFour from "./WeekFour";
 import WeekFive from "./WeekFive";
+import WeekSix from "./WeekSix";
+import WeekSeven from "./WeekSeven";
 import Jurassictube from "./Jurassictube";
+import PluginManagement from "./PluginManagement";
+
 const { exec } = require("child_process");
 // https://github.com/getflywheel/local-components
 import {
@@ -19,9 +23,6 @@ import {
 	Card,
 	InputPasswordToggle,
 	Divider,
-	List,
-	TextButton,
-	Banner,
 } from "@getflywheel/local-components";
 import Select from "react-select";
 export default class Wizardhat extends React.Component {
@@ -58,7 +59,10 @@ export default class Wizardhat extends React.Component {
 		this.weekThreeContent = this.weekThreeContent.bind(this);
 		this.weekFourContent = this.weekFourContent.bind(this);
 		this.weekFiveContent = this.weekFiveContent.bind(this);
+		this.weekSixContent = this.weekSixContent.bind(this);
+		this.weekSevenContent = this.weekSevenContent.bind(this);
 		this.jurassicTube = this.jurassicTube.bind(this);
+		this.pluginManagementContent = this.pluginManagementContent.bind(this);
 	}
 
 	componentDidMount() {
@@ -496,51 +500,10 @@ export default class Wizardhat extends React.Component {
 		ipcRenderer.send("get-premium-plugin-selections");
 	}
 
-	pluginManagement = () => (
-		<div
-			style={{
-				flexGrow: "1",
-				position: "relative",
-			}}
-			class="woo"
-		>
-			<Card style={{ zIndex: 9999, overflow: "visible" }}>
-				A la Carte plugin installation
-				<div style={{ width: "90%", margin: "1em" }}>
-					<Select
-						options={this.state.premiumPluginSelections}
-						placeholder={"Select plugin(s) to install..."}
-						onChange={this.handlePluginSelectionChange}
-						name="plugin_slug"
-						style={{
-							zIndex: 9999,
-							flexGrow: "1",
-							overflow: "visible",
-						}}
-						className="plugin-select"
-						value={this.state.selectedPlugins}
-						isMulti
-					/>
-				</div>
-				<Button
-					className="woo button"
-					//disabled={this.state.installPluginButton}
-
-					onClick={this.installPlugins}
-				>
-					Install
-					{this.renderSpinner()}
-				</Button>
-				<p></p>
-			</Card>
-			<Divider />
-			{/**<Card>
-				Install & Activate Popular Extensions
-				<Button className="woo button">Install</Button>
-					</Card>*/}
-		</div>
-	);
-
+	pluginManagementContent() {
+		return new PluginManagement(this.props);
+	}
+		
 	troubleshootingContent() {
 		return new Troubleshooting(this.props);
 	}
@@ -559,6 +522,14 @@ export default class Wizardhat extends React.Component {
 
 	weekFiveContent() {
 		return new WeekFive(this.props);
+	}
+
+	weekSixContent() {
+		return new WeekSix(this.props);
+	}
+
+	weekSevenContent() {
+		return new WeekSeven(this.props);
 	}
 
 	jurassicTube() {
@@ -604,6 +575,18 @@ export default class Wizardhat extends React.Component {
 							>
 								Week 5
 							</TertiaryNavItem>
+							<TertiaryNavItem
+								path="/week6"
+								component={this.weekSixContent}
+							>
+								Week 6
+							</TertiaryNavItem>
+							<TertiaryNavItem
+								path="/week7"
+								component={this.weekSevenContent}
+							>
+								Week 7
+							</TertiaryNavItem>
 							<Divider />
 							<TertiaryNavItem path="/title">
 								<Title>Utilities</Title>
@@ -622,11 +605,7 @@ export default class Wizardhat extends React.Component {
 							</TertiaryNavItem>
 							<TertiaryNavItem
 								path="/plugin-management"
-								component={
-									this.state.tokenIsValid
-										? this.pluginManagement
-										: this.tokenInput
-								}
+								component={this.pluginManagementContent}
 							>
 								Plugin Management
 							</TertiaryNavItem>

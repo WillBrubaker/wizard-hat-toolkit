@@ -63,6 +63,7 @@ export default class WeekFour extends Component {
 		ipcRenderer.removeAllListeners("spinner-done");
 		ipcRenderer.removeAllListeners("gh-token");
 		ipcRenderer.removeAllListeners("token-is-valid");
+		ipcRenderer.removeAllListeners("is-day");
 	}
 
 	renderSpinner() {
@@ -723,7 +724,7 @@ export default class WeekFour extends Component {
 								<Title style={{ margin: "1em" }}>Day 5</Title>
 								<p>
 									Today you'll be familiarizing yourself with
-									some thrid party shipping related
+									some third party shipping related
 									extensions.
 								</p>
 								<p>

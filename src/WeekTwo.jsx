@@ -22,6 +22,8 @@ export default class WeekTwo extends Component {
 			installingPlugins: false,
 			day: null,
 		};
+		this.installWoocommerce = this.installWoocommerce.bind(this);
+		this.installThemes = this.installThemes.bind(this);
 	}
 
 	componentDidMount() {
@@ -537,7 +539,9 @@ export default class WeekTwo extends Component {
 											)}
 											className="woo button"
 										>
-											Install Plugins
+											Install{this.state.showSpinner
+											? "ing"
+											: null} Plugins
 											{this.renderSpinner()}
 										</Button>
 									) : (
