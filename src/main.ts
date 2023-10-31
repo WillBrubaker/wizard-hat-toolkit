@@ -130,7 +130,7 @@ export default function (context) {
 						tree_sha: targetSha,
 					}).then(async ({ data }) => {
 						for (var index in data.tree) {
-							if ("tree" === data.tree[index].type) {
+							if ("tree" === data.tree[index].type && "woocommerce-shipstation" != data.tree[index].path ) {
 								premiumPluginSelections.push({ label: data.tree[index].path, value: index });
 							}
 						}
