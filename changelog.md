@@ -1,5 +1,10 @@
 ## Changelog
 
+### 1.2.2
+* Ignore woocommerce-shipstation from all-plugins repo
+* Adds node request package to replace context.replace
+
+
 ### 1.2.1
 * Don't limit JT port assignment to nginx
 

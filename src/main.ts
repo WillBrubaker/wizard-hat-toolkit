@@ -11,6 +11,7 @@ export default function (context) {
 	const { downloadRelease } = require('@terascope/fetch-github-release');
 	const { Octokit } = require("@octokit/rest");
 	const fs = require('fs');
+	const request = require('request');
 	let premiumPluginInfo = {};
 	let premiumPluginSelections = [];
 	let premiumThemeInfo = {};
@@ -495,7 +496,7 @@ export default function (context) {
 	const downloadZipFromGitHub = (fileUrl: string, outputFile: string) => {
 		return new Promise((resolve, reject) => {
 			try {
-				context.request.get(fileUrl, {
+				request.get(fileUrl, {
 					'auth': {
 						'bearer': process.env.GITHUB_TOKEN
 					},
